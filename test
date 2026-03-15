@@ -1,0 +1,202 @@
+<?php
+// Enable error reporting temporarily for debugging
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+session_start();
+include 'db_connect.php';
+
+$error = "";
+$toastMessage = "";
+
+// Optional message for verified accounts
+if (isset($_GET['message']) && $_GET['message'] === "verified") {
+    $toastMessage = "Account verified successfully! You can now log in.";
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+    $email    = trim($_POST['email']);
+    $password = $_POST['password'];
+
+    if (empty($email) || empty($password)) {
+        $error = "All fields are required.";
+    } else {
+
+        $stmt = $conn->prepare("
+            SELECT id, username, password, is_verified 
+            FROM users 
+            WHERE email = ? 
+            LIMIT 1
+        ");
+
+        if (!$stmt) {
+            die("Prepare failed: " . $conn->error);
+        }
+
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if ($result->num_rows === 1) {
+            $user = $result->fetch_assoc();
+
+            if (!password_verify($password, $user['password'])) {
+                $error = "Invalid email or password.";
+            } elseif ($user['is_verified'] == 0) {
+                $error = "Please verify your email before logging in.";
+            } else {
+                // Successful login
+                $_SESSION['user_id']  = $user['id'];
+                $_SESSION['username'] = $user['username'];
+
+                // Log activity
+                $custom_action = 'Login';
+                $usertype = 'Admin'; // Hardcoded
+                $device = isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : 'Unknown';
+
+                $log_stmt = $conn->prepare("INSERT INTO activity_logs (username, usertype, action, device) VALUES (?, ?, ?, ?)");
+                if ($log_stmt) {
+                    $log_stmt->bind_param("ssss", $_SESSION['username'], $usertype, $custom_action, $device);
+                    $log_stmt->execute();
+                    $log_stmt->close();
+                } else {
+                    // Optional: uncomment for debugging
+                    // die("Log prepare failed: " . $conn->error);
+                }
+
+                header("Location: dashboard.php");
+                exit;
+            }
+        } else {
+            $error = "Invalid email or password.";
+        }
+    }
+}
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Login | Gym System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .error-message {
+            background: #ffe5e5;
+            color: #d8000c;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        .toast {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: #4CAF50;
+            color: white;
+            text-align: center;
+            border-radius: 5px;
+            padding: 16px;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            font-size: 14px;
+        }
+
+        .toast.error {
+            background-color: #d8000c;
+        }
+
+        .toast.show {
+            visibility: visible;
+            animation: fadein 0.5s, fadeout 0.5s 3.5s;
+        }
+
+        @keyframes fadein {
+            from {
+                top: 0;
+                opacity: 0;
+            }
+
+            to {
+                top: 20px;
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeout {
+            from {
+                top: 20px;
+                opacity: 1;
+            }
+
+            to {
+                top: 0;
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="auth-container">
+        <div class="auth-card">
+            <img src="images/logo_1.png" class="logo">
+
+            <h2>Welcome Back</h2>
+            <p>Login to your account</p>
+
+            <?php if (!empty($error)): ?>
+            <p style="color: black;" class="error-message">
+                <?php echo htmlspecialchars($error); ?>
+            </p>
+            <?php endif; ?>
+
+            <form action="login.php" method="POST">
+                <div class="input-group">
+                    <input type="email" name="email" required>
+                    <label>Email</label>
+                </div>
+
+                <div class="input-group">
+                    <input type="password" name="password" required>
+                    <label>Password</label>
+                </div>
+
+                <button class="btn">LOGIN</button>
+            </form>
+
+            <p class="switch">
+                <a href="forgot_password.php">Forgot password?</a>
+            </p>
+
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script>
+        function showToast(message, type = "success") {
+            const toast = document.getElementById("toast");
+            toast.innerText = message;
+            toast.className = "toast show" + (type === "error" ? " error" : "");
+            setTimeout(() => {
+                toast.className = toast.className.replace("show", "");
+            }, 4000);
+        }
+
+        <? php if (!empty($toastMessage)): ?>
+            showToast("<?php echo addslashes($toastMessage); ?>", "success");
+        <? php endif; ?>
+    </script>
+</body>
+
+</html>

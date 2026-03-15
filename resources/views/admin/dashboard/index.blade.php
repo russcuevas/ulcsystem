@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ULC System</title>
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
+    <link rel="stylesheet" href="{{ asset('plugins/fontawesome-free/css/all.min.css') }}">
+    <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+    <link rel="stylesheet"
+        href="{{ asset('plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('plugins/icheck-bootstrap/icheck-bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('plugins/jqvmap/jqvmap.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('dist/css/adminlte.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('plugins/overlayScrollbars/css/OverlayScrollbars.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('plugins/daterangepicker/daterangepicker.css') }}">
+    <link rel="stylesheet" href="{{ asset('plugins/summernote/summernote-bs4.min.css') }}">
+    <style>
+        .sidebar {
+            position: relative;
+            height: 100%;
+        }
+
+        .logout-bottom {
+            position: absolute;
+            bottom: 10px;
+            width: 100%;
+        }
+
+        .nav-sidebar .nav-link.active {
+            background-color: #FF5F00 !important;
+            color: #fff !important;
+        }
+
+        .nav-sidebar .nav-link.active i {
+            color: #fff !important;
+        }
+
+        .main-header .nav-link {
+            color: #ffffff !important;
+        }
+
+        .main-header .nav-link i {
+            color: #ffffff !important;
+        }
+
+        .main-header .navbar-nav .nav-link:hover {
+            color: #ffffff !important;
+        }
+    </style>
+</head>
+
+<body class="hold-transition sidebar-mini layout-fixed">
+    <div class="wrapper">
+
+        {{-- TOP BAR --}}
+        @include('admin.components.topbar')
+        {{-- END TOP BAR --}}
+
+        {{-- LEFT SIDEBAR --}}
+        @include('admin.components.sidebar')
+        {{-- END LEFT SIDEBAR --}}
+
+        {{-- MAIN --}}
+        <div class="content-wrapper">
+            <div class="content-header">
+                <div class="container-fluid">
+                    <div class="row mb-2 align-items-center">
+                        <div class="col-sm-6">
+                            <h1 class="m-0">Dashboard</h1>
+                        </div>
+                        <div class="col-sm-6 text-sm-right">
+                            <h5 class="m-0">March 11, 2026 - 8:24pm</h5>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-header">
+                <div class="container-fluid">
+                    <div class="row mb-2 align-items-center">
+                        <div class="col-sm-6">
+                            <h1 class="m-0">Manila Area</h1>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main content -->
+            <section class="content">
+                <div class="container-fluid">
+                    <div class="row">
+                        <!-- Loans box -->
+                        <div class="col-lg-4 col-6">
+                            <div class="small-box bg-light" style="border-top: 4px solid #FF5F00;">
+                                <div class="inner" style="color: #FF5F00;">
+                                    <h3>150</h3>
+                                    <p>Loans</p>
+                                </div>
+                                <div class="icon">
+                                    <i class="fas fa-money-bill-wave" style="color: #FF5F00;"></i>
+                                </div>
+                                <a href="#" class="small-box-footer">
+                                    More info <i class="fas fa-arrow-circle-right" style="color: #FF5F00;"></i>
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Clients box -->
+                        <div class="col-lg-4 col-6">
+                            <div class="small-box bg-light" style="border-top: 4px solid #FF5F00;">
+                                <div class="inner" style="color: #FF5F00;">
+                                    <h3>53<sup style="font-size: 20px">%</sup></h3>
+                                    <p>Users</p>
+                                </div>
+                                <div class="icon">
+                                    <i class="fas fa-users" style="color: #FF5F00;"></i>
+                                </div>
+                                <a href="#" class="small-box-footer">
+                                    More info <i class="fas fa-arrow-circle-right" style="color: #FF5F00;"></i>
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Collected box -->
+                        <div class="col-lg-4 col-6">
+                            <div class="small-box bg-light" style="border-top: 4px solid #FF5F00;">
+                                <div class="inner" style="color: #FF5F00;">
+                                    <h3>44</h3>
+                                    <p>Collected</p>
+                                </div>
+                                <div class="icon">
+                                    <i class="fas fa-hand-holding-usd" style="color: #FF5F00;"></i>
+                                </div>
+                                <a href="#" class="small-box-footer">
+                                    More info <i class="fas fa-arrow-circle-right" style="color: #FF5F00;"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+    <!-- ./wrapper -->
+
+    <!-- jQuery -->
+    <script src="{{ asset('plugins/jquery/jquery.min.js') }}"></script>
+    <script src="{{ asset('plugins/jquery-ui/jquery-ui.min.js') }}"></script>
+    <script>
+        $.widget.bridge('uibutton', $.ui.button)
+    </script>
+    <script src="{{ asset('plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ asset('plugins/chart.js/Chart.min.js') }}"></script>
+    <script src="{{ asset('plugins/sparklines/sparkline.js') }}"></script>
+    <script src="{{ asset('plugins/jqvmap/jquery.vmap.min.js') }}"></script>
+    <script src="{{ asset('plugins/jqvmap/maps/jquery.vmap.usa.js') }}"></script>
+    <script src="{{ asset('plugins/jquery-knob/jquery.knob.min.js') }}"></script>
+    <script src="{{ asset('plugins/moment/moment.min.js') }}"></script>
+    <script src="{{ asset('plugins/daterangepicker/daterangepicker.js') }}"></script>
+    <script src="{{ asset('plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js') }}"></script>
+    <script src="{{ asset('plugins/summernote/summernote-bs4.min.js') }}"></script>
+    <script src="{{ asset('plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js') }}"></script>
+    <script src="{{ asset('dist/js/adminlte.js') }}"></script>
+    <script src="{{ asset('dist/js/demo.js') }}"></script>
+    <script src="{{ asset('dist/js/pages/dashboard.js') }}"></script>
+</body>
+
+</html>
