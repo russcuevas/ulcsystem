@@ -33,7 +33,8 @@ Route::get('/admin/dashboard', [AdminDashboardController::class, 'AdminDashboard
 
 // ADMIN SECRETARY
 Route::get('/admin/secretary', [AdminSecretaryController::class, 'AdminSecretaryPage'])->name('admin.secretary.page');
-
+Route::put('/admin/secretary/update/{id}', [AdminSecretaryController::class, 'AdminUpdateSecretary'])->name('admin.secretary.update');
 
 // ADMIN COLLECTOR
 Route::get('/admin/collector', [AdminCollectorController::class, 'AdminCollectorPage'])->name('admin.collector.page');
+Route::put('/admin/collector/update/{id}', [AdminCollectorController::class, 'AdminUpdateCollector'])->name('admin.collector.update');

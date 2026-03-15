@@ -11,6 +11,8 @@
     <link rel="stylesheet" href="{{ asset('plugins/datatables-responsive/css/responsive.bootstrap4.min.css') }}">
     <link rel="stylesheet" href="{{ asset('plugins/datatables-buttons/css/buttons.bootstrap4.min.css') }}">
     <link rel="stylesheet" href="{{ asset('dist/css/adminlte.min.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
+
     <style>
         .sidebar {
             position: relative;
@@ -92,22 +94,18 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr>
-                                                <td>Maria Santos</td>
-                                                <td>
-                                                    <button class="btn btn-sm btn-warning">
-                                                        <i class="fas fa-edit"></i>
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>Juan Dela Cruz</td>
-                                                <td>
-                                                    <button class="btn btn-sm btn-warning">
-                                                        <i class="fas fa-edit"></i>
-                                                    </button>
-                                                </td>
-                                            </tr>
+                                            @foreach ($collectors as $collector)
+                                                <tr>
+                                                    <td>{{ $collector->fullname }}</td>
+                                                    <td>
+                                                        <button class="btn btn-sm btn-warning" data-toggle="modal"
+                                                            data-target="#editCollectorModal{{ $collector->id }}">
+                                                            <i class="fas fa-edit"></i>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                                @include('admin.collector.modals.edit_modal')
+                                            @endforeach
                                         </tbody>
                                     </table>
                                 </div>
@@ -124,28 +122,32 @@
                                     <table id="areaTable" class="table table-bordered table-hover">
                                         <thead>
                                             <tr>
-                                                <th>Collector Name</th>
-                                                <th>Area</th>
-                                                <th style="width:130px;" class="text-center">Areas</th>
+                                                <th>Location</th>
+                                                <th>Action</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr>
-                                                <td>Maria Santos</td>
-                                                <td>Valenzuela Area</td>
-                                                <td>VA3</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Maria Santos</td>
-                                                <td>Valenzuela Area</td>
-                                                <td>VA4</td>
-                                            </tr>
+                                            @php
+                                                $locations = $collectorAreas->groupBy('location_name');
+                                            @endphp
+
+                                            @foreach ($locations as $locationName => $areas)
+                                                <tr>
+                                                    <td>{{ $locationName }}</td>
+                                                    <td>
+                                                        <button class="btn btn-sm btn-info" data-toggle="modal"
+                                                            data-target="#locationModal{{ Str::slug($locationName) }}">
+                                                            <i class="fas fa-eye"></i> View
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                                @include('admin.collector.modals.view_assigned')
+                                            @endforeach
                                         </tbody>
                                     </table>
                                 </div>
                             </div>
                         </div>
-
                     </div>
                 </div>
             </section>
@@ -170,6 +172,34 @@
     <script src="{{ asset('plugins/datatables-buttons/js/buttons.colVis.min.js') }}"></script>
     <script src="{{ asset('dist/js/adminlte.min.js') }}"></script>
     <script src="{{ asset('dist/js/demo.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+
+            const notyf = new Notyf({
+                duration: 5000,
+                position: {
+                    x: 'right',
+                    y: 'top'
+                }
+            });
+
+            @if (session('success'))
+                notyf.success("{{ session('success') }}");
+            @endif
+
+            @if (session('error'))
+                notyf.error("{{ session('error') }}");
+            @endif
+
+            @if ($errors->any())
+                @foreach ($errors->all() as $error)
+                    notyf.error("{{ $error }}");
+                @endforeach
+            @endif
+
+        });
+    </script>
     <script>
         $(function() {
 

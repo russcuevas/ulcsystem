@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="{{ asset('plugins/datatables-responsive/css/responsive.bootstrap4.min.css') }}">
     <link rel="stylesheet" href="{{ asset('plugins/datatables-buttons/css/buttons.bootstrap4.min.css') }}">
     <link rel="stylesheet" href="{{ asset('dist/css/adminlte.min.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
     <style>
         .sidebar {
             position: relative;
@@ -92,22 +93,17 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr>
-                                                <td>Maria Santos</td>
-                                                <td>
-                                                    <button class="btn btn-sm btn-warning">
-                                                        <i class="fas fa-edit"></i>
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>Juan Dela Cruz</td>
-                                                <td>
-                                                    <button class="btn btn-sm btn-warning">
-                                                        <i class="fas fa-edit"></i>
-                                                    </button>
-                                                </td>
-                                            </tr>
+                                            @foreach ($secretaries as $secretary)
+                                                <tr>
+                                                    <td>{{ $secretary->fullname }}</td>
+                                                    <td>
+                                                        <button class="btn btn-sm btn-warning" data-toggle="modal"
+                                                            data-target="#editSecretaryModal{{ $secretary->id }}">
+                                                            <i class="fas fa-edit"></i>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            @endforeach
                                         </tbody>
                                     </table>
                                 </div>
@@ -125,28 +121,25 @@
                                         <thead>
                                             <tr>
                                                 <th>Secretary Name</th>
-                                                <th style="width:130px;" class="text-center">Action</th>
+                                                <th>Action</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr>
-                                                <td>Maria Santos</td>
-                                                <td>
-                                                    <button class="btn btn-sm btn-info">
-                                                        <i class="fas fa-eye"></i> View
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>Juan Dela Cruz</td>
-                                                <td>
-                                                    <button class="btn btn-sm btn-info">
-                                                        <i class="fas fa-eye"></i> View
-                                                    </button>
-                                                </td>
-                                            </tr>
+                                            @foreach ($secretaries as $secretary)
+                                                <tr>
+                                                    <td>{{ $secretary->fullname }}</td>
+                                                    <td>
+                                                        <button class="btn btn-sm btn-info" data-toggle="modal"
+                                                            data-target="#areasModal{{ $secretary->id }}">
+                                                            <i class="fas fa-eye"></i> View
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            @endforeach
                                         </tbody>
                                     </table>
+                                    @include('admin.secretary.modals.edit_modal')
+                                    @include('admin.secretary.modals.view_modal')
                                 </div>
                             </div>
                         </div>
@@ -175,6 +168,34 @@
     <script src="{{ asset('plugins/datatables-buttons/js/buttons.colVis.min.js') }}"></script>
     <script src="{{ asset('dist/js/adminlte.min.js') }}"></script>
     <script src="{{ asset('dist/js/demo.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+
+            const notyf = new Notyf({
+                duration: 5000,
+                position: {
+                    x: 'right',
+                    y: 'top'
+                }
+            });
+
+            @if (session('success'))
+                notyf.success("{{ session('success') }}");
+            @endif
+
+            @if (session('error'))
+                notyf.error("{{ session('error') }}");
+            @endif
+
+            @if ($errors->any())
+                @foreach ($errors->all() as $error)
+                    notyf.error("{{ $error }}");
+                @endforeach
+            @endif
+
+        });
+    </script>
     <script>
         $(function() {
 
