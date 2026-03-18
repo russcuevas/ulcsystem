@@ -72,7 +72,7 @@
                             <h1 class="m-0">Dashboard</h1>
                         </div>
                         <div class="col-sm-6 text-sm-right">
-                            <h5 class="m-0">March 11, 2026 - 8:24pm</h5>
+                            <h5 class="m-0" id="manila-time"></h5>
                         </div>
                     </div>
                 </div>
@@ -166,6 +166,28 @@
     <script src="{{ asset('dist/js/adminlte.js') }}"></script>
     <script src="{{ asset('dist/js/demo.js') }}"></script>
     <script src="{{ asset('dist/js/pages/dashboard.js') }}"></script>
+    <script>
+        function updateManilaTime() {
+            const options = {
+                timeZone: 'Asia/Manila',
+                year: 'numeric',
+                month: 'long',
+                day: '2-digit',
+                hour: 'numeric',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: true
+            };
+
+            const now = new Date();
+            const formatted = new Intl.DateTimeFormat('en-US', options).format(now);
+
+            document.getElementById('manila-time').innerText = formatted;
+        }
+
+        updateManilaTime();
+        setInterval(updateManilaTime, 1000);
+    </script>
 </body>
 
 </html>

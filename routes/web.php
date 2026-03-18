@@ -3,6 +3,8 @@
 use App\Http\Controllers\admin\AdminCollectorController;
 use App\Http\Controllers\admin\AdminDashboardController;
 use App\Http\Controllers\admin\AdminSecretaryController;
+use App\Http\Controllers\admin\area\AdminManilaClientsController;
+use App\Http\Controllers\admin\area\AdminManilaController;
 use App\Http\Controllers\auth\AuthController;
 use Illuminate\Support\Facades\Route;
 
@@ -38,3 +40,9 @@ Route::put('/admin/secretary/update/{id}', [AdminSecretaryController::class, 'Ad
 // ADMIN COLLECTOR
 Route::get('/admin/collector', [AdminCollectorController::class, 'AdminCollectorPage'])->name('admin.collector.page');
 Route::put('/admin/collector/update/{id}', [AdminCollectorController::class, 'AdminUpdateCollector'])->name('admin.collector.update');
+
+// ADMIN AREAS
+Route::get('/admin/areas/manila', [AdminManilaController::class, 'AdminManilaPage'])->name('admin.manila.area.page');
+Route::get('/admin/areas/manila/clients/{id}', [AdminManilaClientsController::class, 'AdminManilaClientsPage'])->name('admin.manila.area.clients.page');
+Route::post('/admin/areas/manila/clients/{id}/add', [AdminManilaClientsController::class, 'AdminAddClientRequest'])->name('admin.manila.area.clients.add');
+Route::get('/admin/areas/manila/clients/{id}/loans', [AdminManilaClientsController::class, 'AdminViewClientLoans'])->name('admin.manila.area.client.loans');

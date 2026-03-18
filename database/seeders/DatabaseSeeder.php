@@ -17,6 +17,8 @@ class DatabaseSeeder extends Seeder
             SecretaryTableSeeder::class,
             CollectorsTableSeeder::class,
             AreasTableSeeder::class,
+            ClientsTableSeeder::class,
+            ClientsLoansTableSeeder::class,
         ]);
     }
 }
