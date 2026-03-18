@@ -56,6 +56,10 @@
             font-weight: 900;
             /* makes the circle solid */
         }
+
+        .card-primary.card-outline {
+            border-top: 3px solid #FF5F00;
+        }
     </style>
 </head>
 
@@ -88,7 +92,7 @@
 
                         <!-- Collector Table -->
                         <div class="col-md-12">
-                            <div class="card">
+                            <div class="card card-primary card-outline">
                                 <div class="card-header">
                                     <h3 class="card-title">Manila Areas</h3>
                                 </div>

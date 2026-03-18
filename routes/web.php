@@ -44,5 +44,7 @@ Route::put('/admin/collector/update/{id}', [AdminCollectorController::class, 'Ad
 // ADMIN AREAS
 Route::get('/admin/areas/manila', [AdminManilaController::class, 'AdminManilaPage'])->name('admin.manila.area.page');
 Route::get('/admin/areas/manila/clients/{id}', [AdminManilaClientsController::class, 'AdminManilaClientsPage'])->name('admin.manila.area.clients.page');
-Route::post('/admin/areas/manila/clients/{id}/add', [AdminManilaClientsController::class, 'AdminAddClientRequest'])->name('admin.manila.area.clients.add');
-Route::get('/admin/areas/manila/clients/{id}/loans', [AdminManilaClientsController::class, 'AdminViewClientLoans'])->name('admin.manila.area.client.loans');
+Route::post('/admin/areas/manila/clients/{id}/add', [AdminManilaClientsController::class, 'AdminManilaAddClientRequest'])->name('admin.manila.area.clients.add');
+Route::get('/admin/areas/manila/clients/{id}/loans', [AdminManilaClientsController::class, 'AdminManilaViewClientLoans'])->name('admin.manila.area.clients.loans');
+Route::put('/admin/areas/manila/clients/{id}/update', [AdminManilaClientsController::class, 'AdminManilaUpdateClientRequest'])->name('admin.manila.area.clients.update');
+Route::post('/admin/manila/clients/{id}/renew-loan', [AdminManilaClientsController::class, 'AdminManilaSubmitRenewLoan'])->name('admin.manila.area.clients.renew.loan.add');

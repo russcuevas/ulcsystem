@@ -21,7 +21,7 @@ class AdminManilaClientsController extends Controller
         return view('admin.areas.manila.clients', compact('clients', 'areas_name', 'id'));
     }
 
-    public function AdminAddClientRequest(Request $request, $id)
+    public function AdminManilaAddClientRequest(Request $request, $id)
     {
         // Validate input
         $request->validate([
@@ -77,8 +77,12 @@ class AdminManilaClientsController extends Controller
         return redirect()->back()->with('success', 'Client added successfully.');
     }
 
-    public function AdminViewClientLoans($id)
+    public function AdminManilaViewClientLoans($id)
     {
+        $areas_name = DB::table('areas')
+            ->where('id', $id)
+            ->value('areas_name') ?? 'Unknown Area';
+
         $client = DB::table('clients')
             ->where('id', $id)
             ->first();
@@ -88,10 +92,67 @@ class AdminManilaClientsController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
+
+
         if (!$client) {
             return redirect()->back()->with('error', 'Client not found.');
         }
 
-        return view('admin.areas.manila.view_loans', compact('client', 'loans'));
+        return view('admin.areas.manila.view_loans', compact('areas_name', 'client', 'loans'));
+    }
+
+    public function AdminManilaUpdateClientRequest(Request $request, $id)
+    {
+        $request->validate([
+            'fullname' => 'required|string|max:255',
+            'phone' => 'required|string|max:20',
+            'address' => 'required|string|max:255',
+            'gender' => 'required|string'
+        ]);
+
+        $client = Clients::findOrFail($id);
+
+        $client->update([
+            'fullname' => $request->fullname,
+            'phone' => $request->phone,
+            'address' => $request->address,
+            'gender' => $request->gender,
+        ]);
+
+        return back()->with('success', 'Client updated successfully!');
+    }
+
+    public function AdminManilaSubmitRenewLoan(Request $request, $clientId)
+    {
+        $request->validate([
+            'pn_number'      => 'required|string|unique:clients_loans,pn_number',
+            'release_number' => 'required|string|unique:clients_loans,release_number',
+            'loan_from'      => 'required|date',
+            'loan_to'        => 'required|date|after_or_equal:loan_from',
+            'loan_amount'    => 'required|numeric|min:1',
+            'balance'        => 'required|numeric|min:0',
+            'daily'          => 'required|numeric|min:0',
+            'loan_terms'     => 'required|numeric|min:1',
+        ]);
+
+        DB::table('clients_loans')->insert([
+            'client_id'      => $clientId,
+            'pn_number'      => $request->pn_number,
+            'release_number' => $request->release_number,
+            'loan_from'      => $request->loan_from,
+            'loan_to'        => $request->loan_to,
+            'loan_amount'    => $request->loan_amount,
+            'balance'        => $request->balance,
+            'daily'          => $request->daily,
+            'principal'      => $request->loan_amount,
+            'loan_terms'     => $request->loan_terms,
+            'loan_status'    => 'renewal',
+            'status'         => 'unpaid',
+            'created_by'     => 'Admin',
+            'created_at'     => now(),
+            'updated_at'     => now(),
+        ]);
+
+        return redirect()->back()->with('success', 'Loan renewed successfully.');
     }
 }
