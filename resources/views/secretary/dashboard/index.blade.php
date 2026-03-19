@@ -18,7 +18,6 @@
     <link rel="stylesheet" href="{{ asset('plugins/daterangepicker/daterangepicker.css') }}">
     <link rel="stylesheet" href="{{ asset('plugins/summernote/summernote-bs4.min.css') }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
-
     <style>
         .sidebar {
             position: relative;
@@ -58,11 +57,11 @@
     <div class="wrapper">
 
         {{-- TOP BAR --}}
-        @include('admin.components.topbar')
+        @include('secretary.components.topbar')
         {{-- END TOP BAR --}}
 
         {{-- LEFT SIDEBAR --}}
-        @include('admin.components.sidebar')
+        @include('secretary.components.sidebar')
         {{-- END LEFT SIDEBAR --}}
 
         {{-- MAIN --}}
@@ -71,7 +70,7 @@
                 <div class="container-fluid">
                     <div class="row mb-2 align-items-center">
                         <div class="col-sm-6">
-                            <h1 class="m-0">Admin Dashboard</h1>
+                            <h1 class="m-0">Secretary Dashboard</h1>
                         </div>
                         <div class="col-sm-6 text-sm-right">
                             <h5 class="m-0" id="manila-time"></h5>

@@ -9,7 +9,11 @@
 
         <div class="user-panel mt-3 pb-3 mb-3 d-flex">
             <div class="info">
-                <a href="#" class="d-block" style="color: #FF5F00;">Welcome! <br> Alexander Pierce</a>
+                @php $user = Session::get('user'); @endphp
+
+                <a href="#" class="d-block" style="color: #FF5F00;">
+                    Welcome! <br> Administrator <br> {{ $user->fullname ?? 'User' }}
+                </a>
             </div>
         </div>
 
@@ -93,10 +97,14 @@
             <!-- Logout -->
             <ul class="nav nav-pills nav-sidebar logout-bottom">
                 <li class="nav-item">
-                    <a href="/logout" class="nav-link text-danger">
-                        <i class="nav-icon fas fa-sign-out-alt"></i>
-                        <p>Logout</p>
-                    </a>
+                    <form action="{{ route('auth.logout.request') }}" method="POST">
+                        @csrf
+                        <button type="submit" class="nav-link text-danger"
+                            style="border:none; background:none; width:100%; text-align:left;">
+                            <i class="nav-icon fas fa-sign-out-alt"></i>
+                            <p>Logout</p>
+                        </button>
+                    </form>
                 </li>
             </ul>
 

@@ -73,7 +73,6 @@ class AdminManilaClientsController extends Controller
             ]);
         });
 
-        // Redirect back with success message
         return redirect()->back()->with('success', 'Client added successfully.');
     }
 
@@ -156,22 +155,22 @@ class AdminManilaClientsController extends Controller
         return redirect()->back()->with('success', 'Loan renewed successfully.');
     }
 
-    public function generateSOA($loanId)
+    public function AdminManilaGenerateSOA($loanId)
     {
         $loan = DB::table('clients_loans')
-        ->select(
-            'id',
-            'client_id',
-            'pn_number', // ✅ IMPORTANT
-            'release_number',
-            'loan_amount',
-            'balance',
-            'daily',
-            'loan_from',
-            'loan_to'
-        )
-        ->where('id', $loanId)
-        ->first();
+            ->select(
+                'id',
+                'client_id',
+                'pn_number', // ✅ IMPORTANT
+                'release_number',
+                'loan_amount',
+                'balance',
+                'daily',
+                'loan_from',
+                'loan_to'
+            )
+            ->where('id', $loanId)
+            ->first();
 
         if (!$loan) {
             return back()->with('error', 'Loan not found.');
