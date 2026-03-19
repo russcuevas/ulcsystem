@@ -197,7 +197,7 @@
                                                     </td>
 
                                                     <td>
-                                                        <a href="" target="_blank"
+                                                        <a href="{{ route('admin.generate.soa', $loan->id) }}" target="_blank"
                                                             class="btn btn-sm btn-primary">
                                                             Generate SOA
                                                         </a>

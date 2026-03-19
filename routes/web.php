@@ -48,3 +48,5 @@ Route::post('/admin/areas/manila/clients/{id}/add', [AdminManilaClientsControlle
 Route::get('/admin/areas/manila/clients/{id}/loans', [AdminManilaClientsController::class, 'AdminManilaViewClientLoans'])->name('admin.manila.area.clients.loans');
 Route::put('/admin/areas/manila/clients/{id}/update', [AdminManilaClientsController::class, 'AdminManilaUpdateClientRequest'])->name('admin.manila.area.clients.update');
 Route::post('/admin/manila/clients/{id}/renew-loan', [AdminManilaClientsController::class, 'AdminManilaSubmitRenewLoan'])->name('admin.manila.area.clients.renew.loan.add');
+Route::get('/admin/soa/{loanId}', [AdminManilaClientsController::class, 'generateSOA'])
+    ->name('admin.generate.soa');

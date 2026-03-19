@@ -155,4 +155,44 @@ class AdminManilaClientsController extends Controller
 
         return redirect()->back()->with('success', 'Loan renewed successfully.');
     }
+
+    public function generateSOA($loanId)
+    {
+        $loan = DB::table('clients_loans')
+        ->select(
+            'id',
+            'client_id',
+            'pn_number', // ✅ IMPORTANT
+            'release_number',
+            'loan_amount',
+            'balance',
+            'daily',
+            'loan_from',
+            'loan_to'
+        )
+        ->where('id', $loanId)
+        ->first();
+
+        if (!$loan) {
+            return back()->with('error', 'Loan not found.');
+        }
+
+        // Get client
+        $client = DB::table('clients')
+            ->where('id', $loan->client_id)
+            ->first();
+
+        // Get payments related to this loan
+        $payments = DB::table('clients_payments')
+            ->where('client_loans_id', $loanId)
+            ->orderBy('due_date', 'asc')
+            ->get();
+
+
+        return view('admin.areas.manila.print.generate_soa', compact(
+            'loan',
+            'client',
+            'payments',
+        ));
+    }
 }
