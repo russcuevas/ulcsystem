@@ -8,8 +8,8 @@ use App\Http\Controllers\admin\AdminDashboardController;
 use App\Http\Controllers\admin\AdminSecretaryController;
 use App\Http\Controllers\admin\area\AdminManilaClientsController;
 use App\Http\Controllers\admin\area\AdminManilaController;
-
-
+use App\Http\Controllers\collector\CollectorCollectionController;
+use App\Http\Controllers\collector\CollectorDashboardController;
 // SECRETARY
 use App\Http\Controllers\secretary\area\SecretaryAreaController;
 use App\Http\Controllers\secretary\area\SecretaryClientsController;
@@ -118,4 +118,16 @@ Route::middleware('role:secretary')->prefix('secretary')->name('secretary.')->gr
 
     Route::get('/areas/clients/soa/{loanId}', [SecretaryClientsController::class, 'SecretaryGenerateSOA'])
         ->name('area.clients.generate.soa');
+});
+
+// COLLECTOR ROUTES
+Route::middleware('role:collector')->prefix('collector')->name('collector.')->group(function () {
+
+    // DASHBOARD
+    Route::get('/dashboard', [CollectorDashboardController::class, 'CollectorDashboardPage'])
+        ->name('dashboard.page');
+
+    // COLLECTIONS PAGE
+    Route::get('/collections', [CollectorCollectionController::class, 'CollectorCollectionPage'])
+        ->name('collections.page');
 });
