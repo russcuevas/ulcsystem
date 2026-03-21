@@ -69,11 +69,11 @@
     <div class="wrapper">
 
         {{-- TOP BAR --}}
-        @include('admin.components.topbar')
+        @include('secretary.components.topbar')
         {{-- END TOP BAR --}}
 
         {{-- LEFT SIDEBAR --}}
-        @include('admin.components.sidebar')
+        @include('secretary.components.sidebar')
         {{-- END LEFT SIDEBAR --}}
 
         {{-- MAIN --}}
@@ -82,7 +82,7 @@
                 <div class="container-fluid">
                     <div class="row mb-2 align-items-center">
                         <div class="col-sm-6">
-                            <h1 class="m-0">Manila Area - [{{ $areas_name }}]</h1>
+                            <h1 class="m-0">{{ $location_name }} - [{{ $areas_name }}]</h1>
                         </div>
                     </div>
                 </div>
@@ -127,7 +127,7 @@
                                     @endphp
 
                                     @if ($canRenew)
-                                        <button type="button" class="btn btn-sm btn-success ml-2" data-toggle="modal"
+                                        <button type="button" class="btn btn-sm btn-success" data-toggle="modal"
                                             data-target="#renewLoanModal">
                                             <i class="fas fa-redo"></i> Renew Loan
                                         </button>
@@ -137,10 +137,10 @@
                         </div>
 
                         {{-- renew modal --}}
-                        @include('admin.areas.manila.modals.renew_loan')
+                        @include('secretary.areas.modals.renew_loan')
 
                         {{-- edit information modal --}}
-                        @include('admin.areas.manila.modals.edit_information')
+                        @include('secretary.areas.modals.edit_information')
 
                         <!-- RIGHT: LOAN TABLE -->
                         <div class="col-md-9">
@@ -199,7 +199,7 @@
                                                     </td>
 
                                                     <td>
-                                                        <a href="{{ route('admin.manila.area.clients.generate.soa', $loan->id) }}"
+                                                        <a href="{{ route('secretary.area.clients.generate.soa', $loan->id) }}"
                                                             target="_blank" class="btn btn-sm btn-primary">
                                                             Generate SOA
                                                         </a>

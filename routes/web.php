@@ -1,14 +1,22 @@
 <?php
+// AUTH
+use App\Http\Controllers\auth\AuthController;
 
+// ADMIN
 use App\Http\Controllers\admin\AdminCollectorController;
 use App\Http\Controllers\admin\AdminDashboardController;
 use App\Http\Controllers\admin\AdminSecretaryController;
 use App\Http\Controllers\admin\area\AdminManilaClientsController;
 use App\Http\Controllers\admin\area\AdminManilaController;
-use App\Http\Controllers\auth\AuthController;
+
+
+// SECRETARY
 use App\Http\Controllers\secretary\area\SecretaryAreaController;
+use App\Http\Controllers\secretary\area\SecretaryClientsController;
 use App\Http\Controllers\secretary\SecretaryCollectorController;
 use App\Http\Controllers\secretary\SecretaryDashboardController;
+
+// COLLECTOR
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -93,4 +101,21 @@ Route::middleware('role:secretary')->prefix('secretary')->name('secretary.')->gr
     Route::get('/areas', [SecretaryAreaController::class, 'SecretaryAreasPage'])
         ->name('areas.page');
 
+    Route::get('/areas/clients/{id}', [SecretaryClientsController::class, 'SecretaryClientsPage'])
+        ->name('areas.clients.page');
+
+    Route::post('/areas/clients/{id}/add', [SecretaryClientsController::class, 'SecretaryAddClientRequest'])
+        ->name('area.clients.add');
+
+    Route::get('/areas/clients/{id}/loans', [SecretaryClientsController::class, 'SecretaryViewClientLoans'])
+        ->name('area.clients.loans');
+
+    Route::put('/areas/clients/{id}/update', [SecretaryClientsController::class, 'SecretaryUpdateClientRequest'])
+        ->name('area.clients.update');
+
+    Route::post('/areas/clients/{id}/renew-loan', [SecretaryClientsController::class, 'SecretarySubmitRenewLoan'])
+        ->name('area.clients.renew.loan.add');
+
+    Route::get('/areas/clients/soa/{loanId}', [SecretaryClientsController::class, 'SecretaryGenerateSOA'])
+        ->name('area.clients.generate.soa');
 });
