@@ -6,6 +6,7 @@ use App\Http\Controllers\admin\AdminSecretaryController;
 use App\Http\Controllers\admin\area\AdminManilaClientsController;
 use App\Http\Controllers\admin\area\AdminManilaController;
 use App\Http\Controllers\auth\AuthController;
+use App\Http\Controllers\secretary\area\SecretaryAreaController;
 use App\Http\Controllers\secretary\SecretaryCollectorController;
 use App\Http\Controllers\secretary\SecretaryDashboardController;
 use Illuminate\Support\Facades\Route;
@@ -88,5 +89,7 @@ Route::middleware('role:secretary')->prefix('secretary')->name('secretary.')->gr
     Route::put('/collector/update/{id}', [SecretaryCollectorController::class, 'SecretaryUpdateCollector'])
         ->name('collector.update');
 
-    // You can add more secretary routes here in the future
+    Route::get('/areas', [SecretaryAreaController::class, 'index'])
+        ->name('areas.page');
+        
 });
