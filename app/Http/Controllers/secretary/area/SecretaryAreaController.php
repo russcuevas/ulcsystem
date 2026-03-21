@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Session;
 
 class SecretaryAreaController extends Controller
 {
-    public function index()
+    public function SecretaryAreasPage()
     {
         $secretary = Session::get('user');
 

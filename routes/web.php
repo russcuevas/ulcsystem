@@ -89,7 +89,8 @@ Route::middleware('role:secretary')->prefix('secretary')->name('secretary.')->gr
     Route::put('/collector/update/{id}', [SecretaryCollectorController::class, 'SecretaryUpdateCollector'])
         ->name('collector.update');
 
-    Route::get('/areas', [SecretaryAreaController::class, 'index'])
+    // AREAS
+    Route::get('/areas', [SecretaryAreaController::class, 'SecretaryAreasPage'])
         ->name('areas.page');
-        
+
 });
