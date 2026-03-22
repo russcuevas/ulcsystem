@@ -73,3 +73,12 @@ is_collected
 created_at
 created_by
 updated_at
+
+
+
+
+TOM:
+display the clients based on todays date and reference number must auto generated
+tapos kapag sinave saka lang siya ma iinsert sa database clients_payments each clients
+reference_number must not unique
+can select past and future date showing all the data that is being collected

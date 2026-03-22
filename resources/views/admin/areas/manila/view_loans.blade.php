@@ -127,7 +127,7 @@
                                     @endphp
 
                                     @if ($canRenew)
-                                        <button type="button" class="btn btn-sm btn-success ml-2" data-toggle="modal"
+                                        <button type="button" class="btn btn-sm btn-success" data-toggle="modal"
                                             data-target="#renewLoanModal">
                                             <i class="fas fa-redo"></i> Renew Loan
                                         </button>

@@ -130,4 +130,8 @@ Route::middleware('role:collector')->prefix('collector')->name('collector.')->gr
     // COLLECTIONS PAGE
     Route::get('/collections', [CollectorCollectionController::class, 'CollectorCollectionPage'])
         ->name('collections.page');
+
+    // ✅ SAVE PER ROW
+    Route::post('/collections/store', [CollectorCollectionController::class, 'store'])
+        ->name('collections.store');
 });

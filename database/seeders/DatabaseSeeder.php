@@ -19,7 +19,7 @@ class DatabaseSeeder extends Seeder
             AreasTableSeeder::class,
             ClientsTableSeeder::class,
             ClientsLoansTableSeeder::class,
-            ClientsPaymentsTableSeeder::class
+            // ClientsPaymentsTableSeeder::class
         ]);
     }
 }

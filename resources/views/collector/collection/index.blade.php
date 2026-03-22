@@ -83,7 +83,9 @@
                 <div class="container-fluid">
                     <div class="row mb-2 align-items-center">
                         <div class="col-sm-6">
-                            {{-- <h1 class="m-0">Manila Area - [{{ $areas_name }}]</h1> --}}
+                            <h1 class="m-0">
+                                {{ $area->location_name ?? 'N/A' }} - [{{ $area->areas_name ?? 'N/A' }}]
+                            </h1>
                         </div>
                     </div>
                 </div>
@@ -99,20 +101,91 @@
                                 <div class="card-header">
                                     <div class="d-flex justify-content-between align-items-center w-100">
 
-                                        {{-- <h3 class="card-title">{{ $areas_name }}</h3> --}}
+                                        <h3 class="card-title">{{ $area->location_name ?? 'N/A' }} -
+                                            [{{ $area->areas_name ?? 'N/A' }}]</h3>
 
 
                                         <button class="btn btn-success btn-sm px-3" data-toggle="modal"
-                                            data-target="#addCollectibles">
-                                            <i class="fas fa-user-plus"></i> Collectibles
+                                            data-target="#selectDate">
+                                            <i class="fas fa-calendar"></i>&nbsp; Select Date
                                         </button>
 
                                     </div>
                                 </div>
 
                                 {{-- add collectibles modal --}}
-                                @include('collector.collection.modals.add_collectibles')
+                                @include('collector.collection.modals.select_date')
                                 <div class="card-body">
+                                    <div class="row g-3 mb-4">
+                                        <div class="col-12 mb-3">
+                                            <div
+                                                class="d-flex justify-content-between align-items-center bg-white p-3 rounded shadow-sm border-start border-4 border-primary">
+                                                <div><span class="badge bg-light text-dark border">REF:
+                                                        {{ $refNo }}</span>
+                                                    <h5 class="mb-0 text-dark">
+                                                        <i class="far fa-calendar-alt me-2 text-primary"></i>
+                                                        {{ \Carbon\Carbon::parse($selectedDate)->format('F d, Y') }}
+                                                    </h5>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <div class="card border-0 shadow-sm h-100">
+                                                <div class="card-body">
+                                                    <div class="d-flex align-items-center">
+                                                        <div
+                                                            class="flex-shrink-0 bg-soft-info p-3 rounded-circle text-info">
+                                                            <i class="fas fa-users fa-lg"></i>
+                                                        </div>
+                                                        <div class="flex-grow-1 ms-3">
+                                                            <p class="text-muted mb-0 small uppercase">Total Clients</p>
+                                                            <h4 class="mb-0 fw-bold">{{ $totalClients }}</h4>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <div class="card border-0 shadow-sm h-100">
+                                                <div class="card-body">
+                                                    <div class="d-flex align-items-center">
+                                                        <div
+                                                            class="flex-shrink-0 bg-soft-success p-3 rounded-circle text-success">
+                                                            <i class="fas fa-hand-holding-usd fa-lg"></i>
+                                                        </div>
+                                                        <div class="flex-grow-1 ms-3">
+                                                            <p class="text-muted mb-0 small uppercase">Total Collections
+                                                            </p>
+                                                            <h4 class="mb-0 fw-bold text-success">
+                                                                ₱{{ number_format($totalCollections, 2) }}</h4>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <div class="card border-0 shadow-sm h-100">
+                                                <div class="card-body">
+                                                    <div class="d-flex align-items-center">
+                                                        <div
+                                                            class="flex-shrink-0 bg-soft-warning p-3 rounded-circle text-warning">
+                                                            <i class="fas fa-file-invoice-dollar fa-lg"></i>
+                                                        </div>
+                                                        <div class="flex-grow-1 ms-3">
+                                                            <p class="text-muted mb-0 small uppercase">Daily
+                                                                Collectibles</p>
+                                                            <h4 class="mb-0 fw-bold text-dark">
+                                                                ₱{{ number_format($totalDailyCollectibles, 2) }}</h4>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    @csrf
                                     <table id="manilaTable" class="table table-bordered table-hover">
                                         <thead>
                                             <tr>
@@ -129,21 +202,74 @@
                                             @foreach ($clients as $client)
                                                 <tr>
                                                     <td>{{ $client->fullname }}</td>
+
+                                                    {{-- Due Date --}}
                                                     <td>
-                                                        <input type="date" value="{{ date('Y-m-d') }}" readonly
-                                                            class="form-control">
+                                                        @if ($client->payment)
+                                                            {{ \Carbon\Carbon::parse($client->payment->due_date)->format('Y-m-d') }}
+                                                        @else
+                                                            <input type="date" value="{{ $selectedDate }}" readonly
+                                                                class="form-control">
+                                                        @endif
                                                     </td>
-                                                    <td>{{ $client->loan?->balance ? '₱' . number_format($client->loan->balance, 2) : '-' }}
-                                                    </td>
-                                                    <td>{{ $client->loan?->daily ? '₱' . number_format($client->loan->daily, 2) : '-' }}
-                                                    </td>
+
+                                                    {{-- Balance --}}
                                                     <td>
-                                                        <input type="text" class="form-control">
+                                                        ₱{{ number_format($client->loan->balance ?? 0, 2) }}
                                                     </td>
+
+                                                    {{-- Daily --}}
                                                     <td>
-                                                        <input type="text" class="form-control">
+                                                        @if ($client->payment)
+                                                            ₱{{ number_format($client->payment->daily, 2) }}
+                                                        @else
+                                                            ₱{{ number_format($client->loan->daily ?? 0, 2) }}
+                                                        @endif
                                                     </td>
-                                                    <td></td>
+
+                                                    {{-- Collection --}}
+                                                    @if ($client->payment)
+                                                        <td>₱{{ number_format($client->payment->collection, 2) }}</td>
+                                                        <td>{{ $client->payment->type }}</td>
+                                                        <td><span class="badge badge-success">Collected</span></td>
+                                                    @else
+                                                        <td>
+                                                            <form action="{{ route('collector.collections.store') }}"
+                                                                method="POST">
+                                                                @csrf
+                                                                <input type="number" step="0.01" name="collection"
+                                                                    class="form-control" required>
+                                                        </td>
+                                                        <td>
+                                                            <select name="type" class="form-control" required>
+                                                                <option value="">Select</option>
+                                                                <option value="CASH">CASH</option>
+                                                                <option value="GCASH">GCASH</option>
+                                                                <option value="CHEQUE">CHEQUE</option>
+                                                            </select>
+                                                        </td>
+                                                        <td>
+                                                            <button type="submit" class="btn btn-success btn-sm">Save
+                                                                collection</button>
+
+                                                            {{-- Hidden Fields --}}
+                                                            <input type="hidden" name="client_id"
+                                                                value="{{ $client->id }}">
+                                                            <input type="hidden" name="loan_id"
+                                                                value="{{ $client->loan->id ?? '' }}">
+                                                            <input type="hidden" name="area_id"
+                                                                value="{{ $client->area_id }}">
+                                                            <input type="hidden" name="reference_no"
+                                                                value="{{ $refNo }}">
+                                                            <input type="hidden" name="due_date"
+                                                                value="{{ $selectedDate }}">
+                                                            <input type="hidden" name="old_balance"
+                                                                value="{{ $client->loan->balance ?? 0 }}">
+                                                            <input type="hidden" name="daily"
+                                                                value="{{ $client->loan->daily ?? 0 }}">
+                                                            </form>
+                                                        </td>
+                                                    @endif
                                                 </tr>
                                             @endforeach
                                         </tbody>
