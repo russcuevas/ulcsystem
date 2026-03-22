@@ -13,6 +13,7 @@ use App\Http\Controllers\collector\CollectorDashboardController;
 // SECRETARY
 use App\Http\Controllers\secretary\area\SecretaryAreaController;
 use App\Http\Controllers\secretary\area\SecretaryClientsController;
+use App\Http\Controllers\secretary\area\SecretaryCollectionController;
 use App\Http\Controllers\secretary\SecretaryCollectorController;
 use App\Http\Controllers\secretary\SecretaryDashboardController;
 
@@ -97,9 +98,11 @@ Route::middleware('role:secretary')->prefix('secretary')->name('secretary.')->gr
     Route::put('/collector/update/{id}', [SecretaryCollectorController::class, 'SecretaryUpdateCollector'])
         ->name('collector.update');
 
-    // AREAS
+    // AREAS PAGE
     Route::get('/areas', [SecretaryAreaController::class, 'SecretaryAreasPage'])
         ->name('areas.page');
+
+    // AREAS CLIENTS PAGE
 
     Route::get('/areas/clients/{id}', [SecretaryClientsController::class, 'SecretaryClientsPage'])
         ->name('areas.clients.page');
@@ -118,6 +121,14 @@ Route::middleware('role:secretary')->prefix('secretary')->name('secretary.')->gr
 
     Route::get('/areas/clients/soa/{loanId}', [SecretaryClientsController::class, 'SecretaryGenerateSOA'])
         ->name('area.clients.generate.soa');
+
+    // AREAS COLLECTION PAGE
+    Route::get('/areas/{areaId}/collections', [SecretaryCollectionController::class, 'CollectionReferencesPage'])
+        ->name('areas.collections.references');
+
+    // View collection detail for a reference
+    Route::get('/collections/{referenceNumber}', [SecretaryCollectionController::class, 'CollectionDetailPage'])
+        ->name('collections.detail');
 });
 
 // COLLECTOR ROUTES

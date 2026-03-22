@@ -11,7 +11,6 @@
     <link rel="stylesheet" href="{{ asset('plugins/datatables-responsive/css/responsive.bootstrap4.min.css') }}">
     <link rel="stylesheet" href="{{ asset('plugins/datatables-buttons/css/buttons.bootstrap4.min.css') }}">
     <link rel="stylesheet" href="{{ asset('dist/css/adminlte.min.css') }}">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
     <style>
         .sidebar {
             position: relative;
@@ -81,7 +80,7 @@
                 <div class="container-fluid">
                     <div class="row mb-2 align-items-center">
                         <div class="col-sm-6">
-                            <h1 class="m-0">{{ $location_name }}</h1>
+                            <h1 class="m-0">{{ $location_name }} - [{{ $areas_name }}]</h1>
                         </div>
                     </div>
                 </div>
@@ -89,44 +88,43 @@
             <!-- Main content -->
             <section class="content">
                 <div class="container-fluid">
-                    <div class="row">
 
-                        <!-- Collector Table -->
-                        <div class="col-md-12">
-                            <div class="card card-primary card-outline">
-                                <div class="card-header">
-                                    <h3 class="card-title">{{ $location_name }}</h3>
-                                </div>
-                                <div class="card-body">
-                                    <table id="manilaTable" class="table table-bordered table-hover">
-                                        <thead>
-                                            <tr>
-                                                <th>Area Code</th>
-                                                <th>Action</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach ($areas as $area)
-                                                <tr>
-                                                    <td>{{ $area->areas_name }}</td>
-                                                    <td>
-                                                        <a href="{{ route('secretary.areas.clients.page', $area->id) }}"
-                                                            class="btn btn-sm btn-info">
-                                                            <i class="fas fa-eye"></i> View Clients
-                                                        </a>
-                                                        <a href="{{ route('secretary.areas.collections.references', $area->id) }}"
-                                                            class="btn btn-sm btn-success">
-                                                            <i class="fas fa-hand-holding-usd"></i> Collections
-                                                        </a>
-                                                    </td>
-                                                </tr>
-                                            @endforeach
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
+                    <div class="card card-primary card-outline">
+                        <div class="card-header">
+                            <h3 class="card-title">Payment References - {{ $areas_name }}</h3>
+                        </div>
+                        <div class="card-body">
+                            <table id="referencesTable" class="table table-bordered table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Reference Number</th>
+                                        <th>Collected By</th>
+                                        <th>Total Clients</th>
+                                        <th>Date</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($references as $ref)
+                                        <tr>
+                                            <td>{{ $ref->reference_number }}</td>
+                                            <td>{{ $ref->collected_by_name ?? 'N/A' }}</td>
+                                            <td>{{ $ref->total_clients }}</td>
+
+                                            <td>{{ \Carbon\Carbon::parse($ref->due_date)->format('Y-m-d') }}</td>
+                                            <td>
+                                                <a href="{{ route('secretary.collections.detail', $ref->reference_number) }}"
+                                                    class="btn btn-sm btn-info">
+                                                    <i class="fas fa-eye"></i> View
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
                         </div>
                     </div>
+
                 </div>
             </section>
             <!-- /.content -->
@@ -150,38 +148,10 @@
     <script src="{{ asset('plugins/datatables-buttons/js/buttons.colVis.min.js') }}"></script>
     <script src="{{ asset('dist/js/adminlte.min.js') }}"></script>
     <script src="{{ asset('dist/js/demo.js') }}"></script>
-    <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-
-            const notyf = new Notyf({
-                duration: 5000,
-                position: {
-                    x: 'right',
-                    y: 'top'
-                }
-            });
-
-            @if (session('success'))
-                notyf.success("{{ session('success') }}");
-            @endif
-
-            @if (session('error'))
-                notyf.error("{{ session('error') }}");
-            @endif
-
-            @if ($errors->any())
-                @foreach ($errors->all() as $error)
-                    notyf.error("{{ $error }}");
-                @endforeach
-            @endif
-
-        });
-    </script>
     <script>
         $(function() {
 
-            $('#manilaTable').DataTable({
+            $('#referencesTable').DataTable({
                 "paging": true,
                 "searching": true,
                 "ordering": true,
