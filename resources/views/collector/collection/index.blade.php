@@ -200,7 +200,7 @@
                                         </thead>
                                         <tbody>
                                             @foreach ($clients as $client)
-                                                <tr>
+                                                <tr class="{{ $client->is_overdue ? 'table-danger' : '' }}">
                                                     <td>{{ $client->fullname }}</td>
 
                                                     {{-- Due Date --}}
@@ -231,15 +231,39 @@
                                                     @if ($client->payment)
                                                         <td>₱{{ number_format($client->payment->collection, 2) }}</td>
                                                         <td>{{ $client->payment->type }}</td>
-                                                        <td><span class="badge badge-success">Collected</span></td>
+
+                                                        {{-- STATUS --}}
+                                                        <td>
+                                                            @if ($client->isPaid)
+                                                                <span class="badge badge-primary">Paid Loan</span>
+                                                            @elseif ($client->payment)
+                                                                @if ($client->payment->type === 'NO PAYMENT' || $client->payment->collection == 0)
+                                                                    <span class="badge badge-danger">No Payment</span>
+                                                                @elseif ($client->payment->is_collected == 1)
+                                                                    <span class="badge badge-success">Collected</span>
+                                                                @else
+                                                                    <span class="badge badge-info">To Collect</span>
+                                                                @endif
+                                                            @else
+                                                                <span class="badge badge-secondary">Pending</span>
+                                                            @endif
+                                                        </td>
                                                     @else
                                                         <td>
                                                             <form action="{{ route('collector.collections.store') }}"
                                                                 method="POST">
                                                                 @csrf
                                                                 <input type="number" step="0.01" name="collection"
-                                                                    class="form-control" required>
+                                                                    class="form-control" min="1"
+                                                                    placeholder="Enter amount if any">
+
+                                                                <!-- Helper text -->
+                                                                <small class="form-text" style="color: brown">Leave
+                                                                    blank if no
+                                                                    payment.</small>
+
                                                         </td>
+
                                                         <td>
                                                             <select name="type" class="form-control" required>
                                                                 <option value="">Select</option>
@@ -248,9 +272,11 @@
                                                                 <option value="CHEQUE">CHEQUE</option>
                                                             </select>
                                                         </td>
+
                                                         <td>
-                                                            <button type="submit" class="btn btn-success btn-sm">Save
-                                                                collection</button>
+                                                            <button type="submit" class="btn btn-success btn-sm">
+                                                                Save collection
+                                                            </button>
 
                                                             {{-- Hidden Fields --}}
                                                             <input type="hidden" name="client_id"

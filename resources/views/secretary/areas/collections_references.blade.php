@@ -60,6 +60,38 @@
         .card-primary.card-outline {
             border-top: 3px solid #FF5F00;
         }
+
+        /* Breadcrumb Link Color (Not Active) */
+        .breadcrumb-item a {
+            color: #FF5F00 !important;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        /* Breadcrumb Hover State */
+        .breadcrumb-item a:hover {
+            color: #cc4c00 !important;
+        }
+
+        /* Breadcrumb Separator (The "/" icon) */
+        .breadcrumb-item+.breadcrumb-item::before {
+            color: #ffa366;
+            /* Muted orange for the slash */
+        }
+
+        /* Breadcrumb Active State (The current page) */
+        .breadcrumb-item.active {
+            color: #6c757d;
+            /* Keep the active one grey so users know where they are */
+        }
+
+        .action-buttons button {
+            margin-right: 10px;
+        }
+
+        .action-buttons button:last-child {
+            margin-right: 0;
+        }
     </style>
 </head>
 
@@ -80,7 +112,19 @@
                 <div class="container-fluid">
                     <div class="row mb-2 align-items-center">
                         <div class="col-sm-6">
+                            <!-- Page Title -->
                             <h1 class="m-0">{{ $location_name }} - [{{ $areas_name }}]</h1>
+
+                            <!-- Breadcrumb -->
+                            <ol class="breadcrumb mt-2">
+                                <li class="breadcrumb-item">
+                                    <a href="{{ route('secretary.dashboard.page') }}">Dashboard</a>
+                                </li>
+                                <li class="breadcrumb-item">
+                                    <a href="{{ route('secretary.areas.page') }}">Areas</a>
+                                </li>
+                                <li class="breadcrumb-item active">{{ $areas_name }}</li>
+                            </ol>
                         </div>
                     </div>
                 </div>
@@ -98,9 +142,9 @@
                                 <thead>
                                     <tr>
                                         <th>Reference Number</th>
+                                        <th>Date</th>
                                         <th>Collected By</th>
                                         <th>Total Clients</th>
-                                        <th>Date</th>
                                         <th>Action</th>
                                     </tr>
                                 </thead>
@@ -108,10 +152,9 @@
                                     @foreach ($references as $ref)
                                         <tr>
                                             <td>{{ $ref->reference_number }}</td>
+                                            <td>{{ \Carbon\Carbon::parse($ref->due_date)->format('F j, Y') }}</td>
                                             <td>{{ $ref->collected_by_name ?? 'N/A' }}</td>
                                             <td>{{ $ref->total_clients }}</td>
-
-                                            <td>{{ \Carbon\Carbon::parse($ref->due_date)->format('Y-m-d') }}</td>
                                             <td>
                                                 <a href="{{ route('secretary.collections.detail', $ref->reference_number) }}"
                                                     class="btn btn-sm btn-info">

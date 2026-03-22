@@ -129,6 +129,10 @@ Route::middleware('role:secretary')->prefix('secretary')->name('secretary.')->gr
     // View collection detail for a reference
     Route::get('/collections/{referenceNumber}', [SecretaryCollectionController::class, 'CollectionDetailPage'])
         ->name('collections.detail');
+
+    // web.php
+    Route::post('/areas/collections/collect/{refNo}', [SecretaryCollectionController::class, 'collectPayment'])
+        ->name('collections.collect');
 });
 
 // COLLECTOR ROUTES
