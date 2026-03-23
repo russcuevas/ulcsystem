@@ -119,20 +119,24 @@ Route::middleware('role:secretary')->prefix('secretary')->name('secretary.')->gr
     Route::post('/areas/clients/{id}/renew-loan', [SecretaryClientsController::class, 'SecretarySubmitRenewLoan'])
         ->name('area.clients.renew.loan.add');
 
+    // PRINT SOA
     Route::get('/areas/clients/soa/{loanId}', [SecretaryClientsController::class, 'SecretaryGenerateSOA'])
         ->name('area.clients.generate.soa');
 
     // AREAS COLLECTION PAGE
-    Route::get('/areas/{areaId}/collections', [SecretaryCollectionController::class, 'CollectionReferencesPage'])
+    Route::get('/areas/{areaId}/collections', [SecretaryCollectionController::class, 'SecretaryCollectionReferencesPage'])
         ->name('areas.collections.references');
 
-    // View collection detail for a reference
-    Route::get('/collections/{referenceNumber}', [SecretaryCollectionController::class, 'CollectionDetailPage'])
+    Route::get('/collections/{referenceNumber}', [SecretaryCollectionController::class, 'SecretaryCollectionDetailPage'])
         ->name('collections.detail');
 
-    // web.php
-    Route::post('/areas/collections/collect/{refNo}', [SecretaryCollectionController::class, 'collectPayment'])
+    Route::post('/areas/collections/collect/{refNo}', [SecretaryCollectionController::class, 'SecretaryCollectClientsPayment'])
         ->name('collections.collect');
+    
+    // PRINT COLLECTION
+    Route::get('/collections/print/{refNo}', [SecretaryCollectionController::class, 'SecretaryPrintCollection'])
+        ->name('collections.print');
+
 });
 
 // COLLECTOR ROUTES
@@ -145,8 +149,8 @@ Route::middleware('role:collector')->prefix('collector')->name('collector.')->gr
     // COLLECTIONS PAGE
     Route::get('/collections', [CollectorCollectionController::class, 'CollectorCollectionPage'])
         ->name('collections.page');
-
-    // ✅ SAVE PER ROW
-    Route::post('/collections/store', [CollectorCollectionController::class, 'store'])
+    Route::post('/collections/store', [CollectorCollectionController::class, 'CollectorCollectPaymentRequest'])
         ->name('collections.store');
+
+    
 });

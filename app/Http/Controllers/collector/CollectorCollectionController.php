@@ -101,14 +101,32 @@ class CollectorCollectionController extends Controller
     /**
      * Store a single client's collection.
      */
-    public function store(Request $request)
+    public function CollectorCollectPaymentRequest(Request $request)
     {
         $user = Session::get('user');
 
+        $loan = DB::table('clients_loans')
+            ->where('id', $request->loan_id)
+            ->first();
+
+        if (!$loan) {
+            return redirect()->back()->with('error', 'Loan not found.');
+        }
+
         $request->validate([
-            'collection' => 'required|numeric|min:0',
+            'collection' => [
+                'required',
+                'numeric',
+                'min:0',
+                function ($attribute, $value, $fail) use ($loan) {
+                    if ($value > $loan->balance) {
+                        $fail('Collection cannot exceed remaining balance.');
+                    }
+                }
+            ],
             'type' => 'required|string'
         ]);
+
 
         DB::table('clients_payments')->insert([
             'reference_number' => $request->reference_no,
@@ -118,7 +136,7 @@ class CollectorCollectionController extends Controller
             'client_loans_id' => $request->loan_id,
             'client_area' => $request->area_id,
             'daily' => $request->daily,
-            'old_balance' => $request->old_balance,
+            'old_balance' => $loan->balance, // ✅ real balance from DB
             'collection' => $request->collection,
             'type' => $request->type,
             'is_collected' => 0,

@@ -134,8 +134,19 @@
 
                     <div class="card card-primary card-outline">
                         <div class="card-header">
-                            <h3 class="card-title">Collection</h3>
+                            <div class="d-flex justify-content-between align-items-center w-100">
+
+                                <h3 class="card-title">Collection</h3>
+
+
+                                <a href="{{ route('secretary.collections.print', $refNo) }}" target="_blank"
+                                    class="btn btn-info btn-sm px-3">
+                                    <i class="fas fa-print"></i> Print
+                                </a>
+
+                            </div>
                         </div>
+
                         <div class="card-body">
                             <div class="row g-3 mb-4">
                                 <div class="col-12 mb-3">
@@ -353,7 +364,6 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         $(document).ready(function() {
-            // Track which button was clicked
             $('#collectionForm button[type=submit]').click(function(e) {
                 $('#actionInput').val($(this).data('action'));
             });
@@ -362,7 +372,7 @@
                 let action = $('#actionInput').val();
 
                 if (action === 'collect' || action === 'no_payment') {
-                    e.preventDefault(); // prevent normal submit
+                    e.preventDefault();
 
                     let title = action === 'collect' ?
                         'Are you sure?' :
@@ -404,7 +414,6 @@
                         }
                     });
                 }
-                // Else allow normal submit for other actions
             });
         });
     </script>

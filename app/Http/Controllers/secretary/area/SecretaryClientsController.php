@@ -163,6 +163,7 @@ class SecretaryClientsController extends Controller
 
     public function SecretaryGenerateSOA($loanId)
     {
+        // Get loan
         $loan = DB::table('clients_loans')
             ->select(
                 'id',
@@ -182,9 +183,15 @@ class SecretaryClientsController extends Controller
             return back()->with('error', 'Loan not found.');
         }
 
-        // Get client
+        // Get client with area info
         $client = DB::table('clients')
-            ->where('id', $loan->client_id)
+            ->leftJoin('areas', 'clients.area_id', '=', 'areas.id')
+            ->where('clients.id', $loan->client_id)
+            ->select(
+                'clients.*',
+                'areas.location_name',
+                'areas.areas_name'
+            )
             ->first();
 
         // Get payments

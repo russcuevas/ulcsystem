@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8">
-    <title>ULC System - Statement of Account</title>
+    <title>ULC System</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
@@ -55,9 +55,6 @@
             background: #f2f2f2;
         }
 
-        td.text-center {
-            text-align: center;
-        }
 
         .footer {
             margin-top: 20px;
@@ -87,23 +84,39 @@
     <div class="header">
         <h2>ULTRARITZ LENDING CORPORATION</h2>
         <h4>QUEZON CITY</h4>
-        <p><strong>Statement of Account</strong></p>
-        <p>{{ $client->location_name }} [{{ $client->areas_name }}]</p>
+
+        <p><strong>Collection Summary</strong></p>
+        <p>{{ \Carbon\Carbon::parse($payments->first()->due_date)->format('F j, Y') }}</p>
+
+        <p>
+            {{ $area->location_name }} [{{ $area->areas_name }}]
+        </p>
     </div>
 
-    <div class="details mb-2">
-        <strong>Client:</strong> {{ $client->fullname }} <br>
-        <strong>Phone:</strong> {{ $client->phone }} <br>
+    <div class="mb-2">
+        <strong>Reference No:</strong> {{ $referenceNumber }}
     </div>
 
-    <!-- Summary Table -->
-    <table class="summary-table table table-sm table-bordered">
+    <table class="summary-table w-100 table table-sm table-bordered">
         <tbody>
             <tr class="table-primary">
-                <td><strong>Total Collected</strong></td>
-                <td>₱{{ number_format($totalCollected, 2) }}</td>
+                <td><strong>Collected By</strong></td>
+                <td>{{ $payments->first()->collected_by_name ?? 'N/A' }}</td>
+                <td class="text-end"><strong>Total Collectibles</strong></td>
+                <td class="text-end">₱{{ number_format($totalCollectibles, 2) }}</td>
             </tr>
-
+            <tr>
+                <td><strong># Paid</strong></td>
+                <td>{{ $clientsPaid }}</td>
+                <td class="text-end"><strong>Total Collected</strong></td>
+                <td class="text-end">₱{{ number_format($totalCollected, 2) }}</td>
+            </tr>
+            <tr>
+                <td><strong># No Payment</strong></td>
+                <td>{{ $clientsNotPaid }}</td>
+                <td></td>
+                <td></td>
+            </tr>
             <tr>
                 <td><strong># Lapsed</strong></td>
                 <td>{{ $totalLapsed }}</td>
@@ -113,29 +126,34 @@
         </tbody>
     </table>
 
-    <!-- Payments Table -->
     <table class="table-data">
         <thead>
             <tr>
-                <th>Ref #</th>
-                <th>PN Number</th>
-                <th>Due Date</th>
+                <th>Client</th>
+                <th>Loan</th>
+                <th>Old Bal</th>
+                <th>Bal</th>
                 <th>Daily</th>
-                <th>Old Balance</th>
                 <th>Collection</th>
                 <th>Type</th>
+                <th>Lapsed</th>
             </tr>
         </thead>
         <tbody>
             @foreach ($payments as $payment)
                 <tr>
-                    <td>{{ $payment->reference_number }}</td>
-                    <td>{{ $loan->pn_number ?? '-' }}</td>
-                    <td>{{ \Carbon\Carbon::parse($payment->due_date)->format('M d, Y') }}</td>
-                    <td>₱{{ number_format($payment->daily, 2) }}</td>
+                    <td>{{ $payment->fullname }}</td>
+                    <td>₱{{ number_format($payment->loan_amount, 2) }}</td>
                     <td>₱{{ number_format($payment->old_balance, 2) }}</td>
-                    <td>{{ is_numeric($payment->collection) ? '₱' . number_format($payment->collection, 2) : '-' }}</td>
-                    <td>{{ ucfirst($payment->type ?? '-') }}</td>
+                    <td>₱{{ number_format($payment->balance, 2) }}</td>
+                    <td>₱{{ number_format($payment->daily, 2) }}</td>
+                    <td>
+                        {{ is_numeric($payment->collection) ? '₱' . number_format($payment->collection, 2) : '-' }}
+                    </td>
+                    <td>{{ $payment->type ?? '-' }}</td>
+                    <td class="text-center">
+                        {{ $payment->is_lapsed ? 'YES' : 'NO' }}
+                    </td>
                 </tr>
             @endforeach
         </tbody>
@@ -149,6 +167,7 @@
         window.onload = function() {
             window.print();
         };
+
         window.onafterprint = function() {
             window.close();
         };
