@@ -145,6 +145,8 @@
                                         <th>Date</th>
                                         <th>Collected By</th>
                                         <th>Total Clients</th>
+                                        <th>Total Collectibles</th>
+                                        <th>Total Collections</th>
                                         <th>Action</th>
                                     </tr>
                                 </thead>
@@ -155,6 +157,8 @@
                                             <td>{{ \Carbon\Carbon::parse($ref->due_date)->format('F j, Y') }}</td>
                                             <td>{{ $ref->collected_by_name ?? 'N/A' }}</td>
                                             <td>{{ $ref->total_clients }}</td>
+                                            <td>₱{{ number_format($ref->total_daily_collectibles ?? 0, 2) }}</td>
+                                            <td>₱{{ number_format($ref->total_collections ?? 0, 2) }}</td>
                                             <td>
                                                 <a href="{{ route('secretary.collections.detail', $ref->reference_number) }}"
                                                     class="btn btn-sm btn-info">

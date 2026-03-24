@@ -113,6 +113,10 @@ Route::middleware('role:secretary')->prefix('secretary')->name('secretary.')->gr
     Route::get('/areas/clients/{id}/loans', [SecretaryClientsController::class, 'SecretaryViewClientLoans'])
         ->name('area.clients.loans');
 
+    // PRINT SUMMARY LOAN
+    Route::get('/areas/clients/{id}/print-summary-loan', [SecretaryClientsController::class, 'SecretaryPrintSummaryLoan'])
+        ->name('area.clients.print_summary_loan');
+
     Route::put('/areas/clients/{id}/update', [SecretaryClientsController::class, 'SecretaryUpdateClientRequest'])
         ->name('area.clients.update');
 

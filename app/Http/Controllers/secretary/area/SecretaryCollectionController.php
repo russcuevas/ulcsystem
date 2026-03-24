@@ -72,6 +72,17 @@ class SecretaryCollectionController extends Controller
 
             $ref->total_clients = $filteredClients->count();
 
+            // Total collections for this reference (sum of payment.collection for filtered clients)
+            $ref->total_collections = $filteredClients->sum(function ($loan) use ($payments) {
+                $payment = $payments[$loan->client_id] ?? null;
+                return $payment ? ($payment->collection ?? 0) : 0;
+            });
+
+            // Total daily collectible for this reference (sum of loan.daily for filtered clients)
+            $ref->total_daily_collectibles = $filteredClients->sum(function ($loan) {
+                return $loan->daily ?? 0;
+            });
+
             return $ref;
         });
 

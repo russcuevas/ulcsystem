@@ -145,11 +145,18 @@
                         <!-- RIGHT: LOAN TABLE -->
                         <div class="col-md-9">
                             <div class="card card-primary card-outline">
-                                <div class="card-header">
-                                    <span>
-                                        <i class="fas fa-file-invoice-dollar"></i> Loan History
-                                    </span>
-                                </div>
+                                    <div class="card-header">
+                                                                    <div class="d-flex justify-content-between align-items-center w-100">
+
+                                        <span>
+                                            <i class="fas fa-file-invoice-dollar"></i> Loan History
+                                        </span>
+                                        <a href="{{ route('secretary.area.clients.print_summary_loan', $client->id) }}" target="_blank" class="btn btn-sm btn-info">
+                                            <i class="fas fa-print"></i> Print Summary Loan
+                                        </a>
+                                                                    </div>
+                                    </div>
+                                    
 
                                 <div class="card-body table-responsive">
                                     <table id="loanTable" class="table table-bordered table-striped">

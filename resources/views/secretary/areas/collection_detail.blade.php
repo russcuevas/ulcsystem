@@ -246,6 +246,15 @@
                                 </div>
 
                             </div>
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div id="filterTabs" class="btn-group" role="group" aria-label="Filter">
+                                    <button type="button" class="btn btn-outline-primary active" data-filter="all">All</button>
+                                    <button type="button" class="btn btn-outline-primary" data-filter="normal">Normal Account</button>
+                                    <button type="button" class="btn btn-outline-primary" data-filter="lapsed">Lapsed Account</button>
+                                </div>
+                            </div>
+                            <input type="hidden" id="currentFilter" value="all">
+
                             <table id="referencesTable" class="table table-bordered table-hover">
                                 <thead>
                                     <tr>
@@ -275,7 +284,7 @@
                                             $isPaid = $balance <= 0;
                                         @endphp
 
-                                        <tr class="{{ $isDangerRow ? 'table-danger' : '' }}">
+                                        <tr class="{{ $isDangerRow ? 'table-danger' : '' }}" data-status="{{ $isDangerRow ? 'lapsed' : 'normal' }}">
                                             <td>{{ $client->fullname }}</td>
 
                                             {{-- Due Date --}}
@@ -420,12 +429,33 @@
     <script>
         $(function() {
 
-            $('#referencesTable').DataTable({
+            var table = $('#referencesTable').DataTable({
                 "paging": true,
                 "searching": true,
                 "ordering": true,
                 "responsive": true
             });
+
+            // Custom filter using data-status attribute on <tr>
+            $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
+                if (settings.nTable.id !== 'referencesTable') return true;
+                var filter = $('#currentFilter').val();
+                if (!filter || filter === 'all') return true;
+                var node = table.row(dataIndex).node();
+                var status = $(node).data('status');
+                if (filter === 'lapsed') return status === 'lapsed';
+                if (filter === 'normal') return status === 'normal';
+                return true;
+            });
+
+            $('#filterTabs button').on('click', function() {
+                var filter = $(this).data('filter');
+                $('#filterTabs button').removeClass('active');
+                $(this).addClass('active');
+                $('#currentFilter').val(filter);
+                table.draw();
+            });
+
 
         });
     </script>

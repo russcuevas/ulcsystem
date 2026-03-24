@@ -106,6 +106,42 @@ class SecretaryClientsController extends Controller
         ));
     }
 
+    public function SecretaryPrintSummaryLoan($clientId)
+    {
+        $client = DB::table('clients')
+            ->where('id', $clientId)
+            ->first();
+
+        if (!$client) {
+            return back()->with('error', 'Client not found.');
+        }
+
+        // Get area
+        $area = DB::table('areas')
+            ->where('id', $client->area_id)
+            ->first();
+
+        $loans = DB::table('clients_loans')
+            ->where('client_id', $clientId)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $totalDaily = $loans->sum('daily');
+        $totalAmount = $loans->sum('loan_amount');
+        $newCount = $loans->where('loan_status', 'new')->count();
+        $renewalCount = $loans->where('loan_status', 'renewal')->count();
+
+        return view('secretary.areas.print.print_summary_loan', compact(
+            'loans',
+            'client',
+            'area',
+            'totalDaily',
+            'totalAmount',
+            'newCount',
+            'renewalCount'
+        ));
+    }
+
     public function SecretaryUpdateClientRequest(Request $request, $id)
     {
         $request->validate([
