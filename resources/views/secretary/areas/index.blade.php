@@ -96,6 +96,12 @@
                             <div class="card card-primary card-outline">
                                 <div class="card-header">
                                     <h3 class="card-title">{{ $location_name }}</h3>
+                                    <div class="card-tools">
+                                        <button type="button" class="btn btn-sm btn-info" data-toggle="modal"
+                                            data-target="#printSalesModal">
+                                            <i class="fas fa-print"></i> Print Sales
+                                        </button>
+                                    </div>
                                 </div>
                                 <div class="card-body">
                                     <table id="manilaTable" class="table table-bordered table-hover">
@@ -130,6 +136,52 @@
                 </div>
             </section>
             <!-- /.content -->
+        </div>
+    </div>
+
+    <!-- Print Sales Modal -->
+    <div class="modal fade" id="printSalesModal" tabindex="-1" role="dialog" aria-labelledby="printSalesModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form action="{{ route('secretary.areas.sales.report.print') }}" method="POST" target="_blank">
+                    @csrf
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="printSalesModalLabel"><i class="fas fa-print"></i> Print Sales
+                            Reports</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                aria-hidden="true">&times;</span></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">FROM DATE</label>
+                            <input type="date" name="from" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">TO DATE</label>
+                            <input type="date" name="to" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">AREA</label>
+                            <select name="area_id" class="form-select">
+                                <option value="">Select Area</option>
+                                @foreach ($areas as $area)
+                                    <option value="{{ $area->id }}">{{ $area->areas_name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="all_areas" value="1"
+                                id="allAreasCheck">
+                            <label class="form-check-label" for="allAreasCheck">(CLICK THIS BOX IF ALL AREAS)</label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Print</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 

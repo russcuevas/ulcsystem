@@ -3,9 +3,7 @@
 
 <head>
     <meta charset="utf-8">
-    <title>ULC System - Statement of Account</title>
-
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Statement of Account</title>
 
     <style>
         body {
@@ -14,54 +12,61 @@
             color: #000;
         }
 
-        .header {
-            text-align: center;
+        .container {
+            width: 100%;
+        }
+
+        .top-header {
+            display: flex;
+            justify-content: space-between;
             margin-bottom: 10px;
         }
 
-        .header h2 {
-            font-size: 16px;
+        .title {
+            font-size: 18px;
             font-weight: bold;
-            margin: 0;
         }
 
-        .header h4 {
-            font-size: 14px;
-            margin: 0;
+        .right-info {
+            text-align: right;
+            font-size: 11px;
         }
 
-        .header p {
-            margin: 2px 0;
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
         }
 
-        .summary-table td {
-            padding: 4px 6px;
+        .info-box {
+            width: 48%;
         }
 
-        .table-data {
+        .line {
+            border-bottom: 1px solid #000;
+            display: inline-block;
+            min-width: 150px;
+        }
+
+        table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 10px;
         }
 
-        .table-data th,
-        .table-data td {
+        th,
+        td {
             border: 1px solid #000;
             padding: 5px;
-            font-size: 11px;
-        }
-
-        .table-data th {
-            background: #f2f2f2;
-        }
-
-        td.text-center {
             text-align: center;
         }
 
-        .footer {
-            margin-top: 20px;
-            font-size: 11px;
+        th {
+            background: #eaeaea;
+        }
+
+        .no-border td {
+            border: none;
         }
 
         @media print {
@@ -74,73 +79,149 @@
 
 <body>
 
-    @php
-        $totalCollectibles = $payments->sum('daily');
-        $totalCollected = $payments->sum(fn($p) => is_numeric($p->collection) ? $p->collection : 0);
-        $clientsPaid = $payments->filter(fn($p) => $p->collection > 0 && $p->type != 'NO PAYMENT')->count();
-        $clientsNotPaid = $payments->filter(fn($p) => $p->type == 'NO PAYMENT')->count();
+    <div class="container">
 
-        $totalLapsed = $payments->filter(fn($p) => $p->is_lapsed)->count();
-        $totalNotLapsed = $payments->filter(fn($p) => !$p->is_lapsed)->count();
-    @endphp
+        <!-- HEADER -->
+        <div class="top-header">
+            <div class="title">
+                {{ strtoupper($client->fullname) }}
+            </div>
 
-    <div class="header">
-        <h2>ULTRARITZ LENDING CORPORATION</h2>
-        <h4>QUEZON CITY</h4>
-        <p><strong>Statement of Account</strong></p>
-        <p>{{ $client->location_name }} [{{ $client->areas_name }}]</p>
-    </div>
+            <div class="right-info">
+                For any concern, Please contact:<br>
+                Mobile No.: 0995-418-1658<br>
+                <strong>JESSA A. MISAJON - OIC</strong>
+            </div>
+        </div>
 
-    <div class="details mb-2">
-        <strong>Client:</strong> {{ $client->fullname }} <br>
-        <strong>Phone:</strong> {{ $client->phone }} <br>
-    </div>
+        <!-- DETAILS -->
+        <div class="info-row">
+            <div class="info-box">
+                NAME: <span class="line">{{ $client->fullname }}</span>
+            </div>
 
-    <!-- Summary Table -->
-    <table class="summary-table table table-sm table-bordered">
-        <tbody>
-            <tr class="table-primary">
-                <td><strong>Total Collected</strong></td>
-                <td>₱{{ number_format($totalCollected, 2) }}</td>
-            </tr>
+            <div class="info-box">
+                DATE: <span class="line">{{ now()->format('M d, Y') }}</span>
+            </div>
+        </div>
 
+        <div class="info-row">
+            <div class="info-box">
+                PN#: <span class="line">{{ $loan->pn_number }}</span>
+            </div>
+
+            <div class="info-box">
+                DURATION:
+                <span class="line">
+                    {{ \Carbon\Carbon::parse($loan->loan_from)->format('M d, Y') }}
+                    -
+                    {{ \Carbon\Carbon::parse($loan->loan_to)->format('M d, Y') }}
+                </span>
+            </div>
+        </div>
+
+        <div class="info-row">
+            <div class="info-box">
+                FC: <span class="line">N/A</span>
+            </div>
+        </div>
+
+        <!-- LOAN SUMMARY -->
+        <table>
             <tr>
-                <td><strong># Lapsed</strong></td>
-                <td>{{ $totalLapsed }}</td>
-                <td><strong># Not Lapsed</strong></td>
-                <td>{{ $totalNotLapsed }}</td>
+                <th>PN AMOUNT</th>
+                <th>DUE DATE</th>
+                <th>TERMS</th>
             </tr>
-        </tbody>
-    </table>
-
-    <!-- Payments Table -->
-    <table class="table-data">
-        <thead>
             <tr>
-                <th>Ref #</th>
-                <th>PN Number</th>
-                <th>Due Date</th>
-                <th>Daily</th>
-                <th>Old Balance</th>
-                <th>Collection</th>
-                <th>Type</th>
+                <td>₱{{ number_format($loan->loan_amount, 2) }}</td>
+                <td>{{ \Carbon\Carbon::parse($loan->loan_to)->format('M d, Y') }}</td>
+                <td>{{ $loan->loan_terms ?? 'N/A' }}</td>
             </tr>
-        </thead>
-        <tbody>
-            @foreach ($payments as $payment)
-                <tr>
-                    <td>{{ $payment->reference_number }}</td>
-                    <td>{{ $loan->pn_number ?? '-' }}</td>
-                    <td>{{ \Carbon\Carbon::parse($payment->due_date)->format('M d, Y') }}</td>
-                    <td>₱{{ number_format($payment->daily, 2) }}</td>
-                    <td>₱{{ number_format($payment->old_balance, 2) }}</td>
-                    <td>{{ is_numeric($payment->collection) ? '₱' . number_format($payment->collection, 2) : '-' }}</td>
-                    <td>{{ ucfirst($payment->type ?? '-') }}</td>
-                </tr>
-            @endforeach
-        </tbody>
-    </table>
+        </table>
 
+        <!-- PAYMENT TABLE -->
+        @php
+            $chunks = $payments->chunk(100); // 100 per page (50 left, 50 right)
+        @endphp
+
+        @foreach ($chunks as $pageIndex => $chunk)
+            @php
+                $left = $chunk->slice(0, 50);
+                $right = $chunk->slice(50, 50);
+            @endphp
+
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+
+                <!-- LEFT TABLE -->
+                <table style="width: 50%;">
+                    <thead>
+                        <tr>
+                            <th>NO.</th>
+                            <th>DATE</th>
+                            <th>DAILY</th>
+                            <th>PAYMENT</th>
+                            <th>LAPSED</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($left as $index => $payment)
+                            @php
+                                $dueDate = \Carbon\Carbon::parse($payment->due_date);
+                                $loanEnd = \Carbon\Carbon::parse($loan->loan_to);
+                                $isLapsed = $dueDate->gt($loanEnd) && $loan->balance > 0;
+                            @endphp
+                            <tr>
+                                <td>{{ $index + 1 }}</td>
+                                <td>{{ $dueDate->format('M d Y') }}</td>
+                                <td>{{ number_format($payment->daily ?? 0, 2) }}</td>
+                                <td>
+                                    {{ is_numeric($payment->collection) ? number_format($payment->collection, 2) : '-' }}
+                                </td>
+                                <td>{{ $isLapsed ? 'YES' : 'NO' }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+
+                <!-- RIGHT TABLE -->
+                <table style="width: 50%;">
+                    <thead>
+                        <tr>
+                            <th>NO.</th>
+                            <th>DATE</th>
+                            <th>DAILY</th>
+                            <th>PAYMENT</th>
+                            <th>LAPSED</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($right as $index => $payment)
+                            @php
+                                $dueDate = \Carbon\Carbon::parse($payment->due_date);
+                                $loanEnd = \Carbon\Carbon::parse($loan->loan_to);
+                                $isLapsed = $dueDate->gt($loanEnd) && $loan->balance > 0;
+                            @endphp
+                            <tr>
+                                <td>{{ $index + 51 }}</td>
+                                <td>{{ $dueDate->format('M d Y') }}</td>
+                                <td>{{ number_format($payment->daily ?? 0, 2) }}</td>
+                                <td>
+                                    {{ is_numeric($payment->collection) ? number_format($payment->collection, 2) : '-' }}
+                                </td>
+                                <td>{{ $isLapsed ? 'YES' : 'NO' }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+
+            </div>
+
+            <!-- PAGE BREAK -->
+            <div style="page-break-after: always;"></div>
+        @endforeach
+
+    </div>
     <div class="footer">
         <p>Printed on: {{ now()->format('F j, Y h:i A') }}</p>
     </div>

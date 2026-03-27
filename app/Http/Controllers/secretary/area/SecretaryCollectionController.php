@@ -370,6 +370,7 @@ class SecretaryCollectionController extends Controller
                 'c.fullname',
                 'cl.loan_amount',
                 'cl.balance',
+                'cl.loan_to',
                 'col.fullname as collected_by_name'
             )
             ->orderBy('c.fullname')

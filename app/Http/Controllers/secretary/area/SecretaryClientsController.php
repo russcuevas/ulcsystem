@@ -210,7 +210,8 @@ class SecretaryClientsController extends Controller
                 'balance',
                 'daily',
                 'loan_from',
-                'loan_to'
+                'loan_to',
+                'loan_terms',
             )
             ->where('id', $loanId)
             ->first();

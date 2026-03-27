@@ -77,8 +77,20 @@
         $clientsPaid = $payments->filter(fn($p) => $p->collection > 0 && $p->type != 'NO PAYMENT')->count();
         $clientsNotPaid = $payments->filter(fn($p) => $p->type == 'NO PAYMENT')->count();
 
-        $totalLapsed = $payments->filter(fn($p) => $p->is_lapsed)->count();
-        $totalNotLapsed = $payments->filter(fn($p) => !$p->is_lapsed)->count();
+        $totalLapsed = 0;
+        $totalNotLapsed = 0;
+        foreach ($payments as $p) {
+            $balance = $p->balance ?? 0;
+            $hasBalance = $balance > 0;
+            $today = \Carbon\Carbon::parse($p->due_date);
+            $loanEnd = \Carbon\Carbon::parse($p->loan_to);
+            $isLapsed = $hasBalance && $today->greaterThan($loanEnd);
+            if ($isLapsed) {
+                $totalLapsed++;
+            } else {
+                $totalNotLapsed++;
+            }
+        }
     @endphp
 
     <div class="header">
@@ -152,7 +164,14 @@
                     </td>
                     <td>{{ $payment->type ?? '-' }}</td>
                     <td class="text-center">
-                        {{ $payment->is_lapsed ? 'YES' : 'NO' }}
+                        @php
+                            $balance = $payment->balance ?? 0;
+                            $hasBalance = $balance > 0;
+                            $today = \Carbon\Carbon::parse($payment->due_date);
+                            $loanEnd = \Carbon\Carbon::parse($payment->loan_to);
+                            $isLapsed = $hasBalance && $today->greaterThan($loanEnd);
+                        @endphp
+                        {{ $isLapsed ? 'YES' : 'NO' }}
                     </td>
                 </tr>
             @endforeach

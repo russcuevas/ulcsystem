@@ -52,22 +52,21 @@
 <body>
     <div class="wrapper">
         <section class="invoice">
-        <div class="header">
-            <h2>ULTRARITZ LENDING CORPORATION</h2>
-            <h4>QUEZON CITY</h4>
+            <div class="header">
+                <h2>ULTRARITZ LENDING CORPORATION</h2>
+                <h4>QUEZON CITY</h4>
 
-            <p><strong>Loan History</strong></p>
+                <p><strong>Loan History</strong></p>
 
-            <p>
-                {{ $area->location_name }} [{{ $area->areas_name }}]
-            </p>
-        </div>
+                <p>
+                    {{ $area->location_name }} [{{ $area->areas_name }}]
+                </p>
+            </div>
 
 
             <div class="mb-3">
                 <strong>Client:</strong> {{ $client->fullname }} <br>
                 <strong>Phone:</strong> {{ $client->phone }} <br>
-                <strong>Date Printed:</strong> {{ now()->format('F d, Y') }}
             </div>
 
             <table class="table table-borderless summary-table">
@@ -109,7 +108,9 @@
 
         </section>
     </div>
-
+    <div class="footer">
+        <p>Printed on: {{ now()->format('F j, Y h:i A') }}</p>
+    </div>
     <script>
         window.addEventListener("load", () => {
             window.print();

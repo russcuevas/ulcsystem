@@ -102,6 +102,10 @@ Route::middleware('role:secretary')->prefix('secretary')->name('secretary.')->gr
     Route::get('/areas', [SecretaryAreaController::class, 'SecretaryAreasPage'])
         ->name('areas.page');
 
+    // SALES REPORT
+    Route::post('/areas/sales-report', [SecretaryAreaController::class, 'SecretarySalesReportPrint'])
+        ->name('areas.sales.report.print');
+
     // AREAS CLIENTS PAGE
 
     Route::get('/areas/clients/{id}', [SecretaryClientsController::class, 'SecretaryClientsPage'])
