@@ -23,21 +23,24 @@
                 data-accordion="false">
 
                 <li class="nav-item">
-                    <a href="{{ route('secretary.dashboard.page') }}" class="nav-link active">
+                    <a href="{{ route('secretary.dashboard.page') }}"
+                        class="nav-link {{ request()->routeIs('secretary.dashboard.page') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-tachometer-alt"></i>
                         <p>Dashboard</p>
                     </a>
                 </li>
 
                 <li class="nav-item">
-                    <a href="{{ route('secretary.collector.page') }}" class="nav-link">
+                    <a href="{{ route('secretary.collector.page') }}"
+                        class="nav-link {{ request()->routeIs('secretary.collector.*') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-hand-holding-usd"></i>
                         <p>Collector</p>
                     </a>
                 </li>
 
                 <li class="nav-item">
-                    <a href="{{ route('secretary.areas.page') }}" class="nav-link">
+                    <a href="{{ route('secretary.areas.page') }}"
+                        class="nav-link {{ request()->routeIs('secretary.areas.*', 'secretary.area.*', 'secretary.collections.*') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-map-marked-alt"></i>
                         <p>Areas</p>
                     </a>
