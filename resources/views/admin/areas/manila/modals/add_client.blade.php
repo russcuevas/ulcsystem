@@ -13,7 +13,7 @@
             </div>
 
             <!-- FORM -->
-            <form action="{{ route('admin.manila.area.clients.add', $id) }}" method="POST">
+            <form action="{{ route('admin.area.clients.add', $id) }}" method="POST">
                 @csrf
 
                 <!-- hidden area_id input fixed to current area -->

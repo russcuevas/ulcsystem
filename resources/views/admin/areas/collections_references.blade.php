@@ -60,6 +60,38 @@
         .card-primary.card-outline {
             border-top: 3px solid #FF5F00;
         }
+
+        /* Breadcrumb Link Color (Not Active) */
+        .breadcrumb-item a {
+            color: #FF5F00 !important;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        /* Breadcrumb Hover State */
+        .breadcrumb-item a:hover {
+            color: #cc4c00 !important;
+        }
+
+        /* Breadcrumb Separator (The "/" icon) */
+        .breadcrumb-item+.breadcrumb-item::before {
+            color: #ffa366;
+            /* Muted orange for the slash */
+        }
+
+        /* Breadcrumb Active State (The current page) */
+        .breadcrumb-item.active {
+            color: #6c757d;
+            /* Keep the active one grey so users know where they are */
+        }
+
+        .action-buttons button {
+            margin-right: 10px;
+        }
+
+        .action-buttons button:last-child {
+            margin-right: 0;
+        }
     </style>
 </head>
 
@@ -80,7 +112,19 @@
                 <div class="container-fluid">
                     <div class="row mb-2 align-items-center">
                         <div class="col-sm-6">
-                            <h1 class="m-0">{{ $location_name }}</h1>
+                            <!-- Page Title -->
+                            <h1 class="m-0">{{ $location_name }} - [{{ $areas_name }}]</h1>
+
+                            <!-- Breadcrumb -->
+                            <ol class="breadcrumb mt-2">
+                                <li class="breadcrumb-item">
+                                    <a href="{{ route('admin.dashboard.page') }}">Dashboard</a>
+                                </li>
+                                <li class="breadcrumb-item">
+                                    <a href="{{ route('admin.areas.page') }}">Areas</a>
+                                </li>
+                                <li class="breadcrumb-item active">{{ $areas_name }}</li>
+                            </ol>
                         </div>
                     </div>
                 </div>
@@ -88,103 +132,91 @@
             <!-- Main content -->
             <section class="content">
                 <div class="container-fluid">
-                    <div class="row">
 
-                        <!-- Collector Table -->
-                        <div class="col-md-12">
-                            <div class="card card-primary card-outline">
-                                <div class="card-header">
-                                    <h3 class="card-title">{{ $location_name }}</h3>
-                                    <div class="card-tools">
-                                        <button type="button" class="btn btn-sm btn-info" data-toggle="modal"
-                                            data-target="#printSalesModal">
-                                            <i class="fas fa-print"></i> Print Sales
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="card-body">
-                                    <table id="manilaTable" class="table table-bordered table-hover">
-                                        <thead>
-                                            <tr>
-                                                <th>Area Code</th>
-                                                <th>Action</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach ($locationAreas->groupBy('areas_name') as $areaName => $collectors)
-                                                @php
-                                                    $areaId = $collectors->first()->id;
-                                                @endphp
-                                                <tr>
-                                                    <td>{{ $areaName }}</td>
-                                                    <td>
-                                                        <a href="{{ route('admin.areas.clients.page', $areaId) }}"
-                                                            class="btn btn-sm btn-info">
-                                                            <i class="fas fa-eye"></i> View Clients
-                                                        </a>
-                                                        <a href="{{ route('admin.areas.collections.references', $areaId) }}"
-                                                            class="btn btn-sm btn-primary">
-                                                            <i class="fas fa-file-invoice-dollar"></i> Payments
-                                                        </a>
-                                                    </td>
-                                                </tr>
-                                            @endforeach
-                                        </tbody>
-                                    </table>
-                                </div>
+                    <div class="card card-primary card-outline">
+                        <div class="card-header">
+                            <div class="d-flex align-items-center justify-content-between w-100">
+                                <h3 class="card-title mb-0">Payment References - {{ $areas_name }}</h3>
+                                <button type="button" class="btn btn-info btn-sm" data-toggle="modal"
+                                    data-target="#printSummaryModal">
+                                    <i class="fas fa-print"></i> Print Summary
+                                </button>
                             </div>
                         </div>
+                        <div class="card-body">
+                            <table id="referencesTable" class="table table-bordered table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Reference Number</th>
+                                        <th>Date</th>
+                                        <th>Collected By</th>
+                                        <th>Total Clients</th>
+                                        <th>Total Collectibles</th>
+                                        <th>Total Collections</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($references as $ref)
+                                        <tr>
+                                            <td>{{ $ref->reference_number }}</td>
+                                            <td>{{ \Carbon\Carbon::parse($ref->due_date)->format('F j, Y') }}</td>
+                                            <td>{{ $ref->collected_by_name ?? 'N/A' }}</td>
+                                            <td>{{ $ref->total_clients }}</td>
+                                            <td>₱{{ number_format($ref->total_daily_collectibles ?? 0, 2) }}</td>
+                                            <td>₱{{ number_format($ref->total_collections ?? 0, 2) }}</td>
+                                            <td>
+                                                <a href="{{ route('admin.collections.detail', $ref->reference_number) }}"
+                                                    class="btn btn-sm btn-info">
+                                                    <i class="fas fa-eye"></i> View
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
+
                 </div>
             </section>
             <!-- /.content -->
         </div>
     </div>
 
-    <!-- Print Sales Modal -->
-    <div class="modal fade" id="printSalesModal" tabindex="-1" role="dialog" aria-labelledby="printSalesModalLabel"
-        aria-hidden="true">
+    <!-- jQuery -->
+    <!-- Print Summary Modal -->
+    <div class="modal fade" id="printSummaryModal" tabindex="-1" role="dialog"
+        aria-labelledby="printSummaryModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
-                <form action="{{ route('admin.areas.sales.report.print') }}" method="POST" target="_blank">
-                    @csrf
-                    <input type="hidden" name="location_name" value="{{ $location_name }}">
+                <form action="{{ route('admin.areas.collections.summary.print', $areaId) }}" method="GET"
+                    target="_blank">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="printSalesModalLabel">
-                            <i class="fas fa-print"></i> Print Sales Reports
-                        </h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
+                        <h5 class="modal-title" id="printSummaryModalLabel"><i class="fas fa-print"></i> Print Summary
+                            Collection Report</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                aria-hidden="true">&times;</span></button>
                     </div>
                     <div class="modal-body">
                         <div class="form-group">
-                            <label><i class="fas fa-calendar"></i> FROM DATE</label>
+                            <label>FROM DATE</label>
                             <input type="date" name="from" class="form-control" required>
                         </div>
                         <div class="form-group">
-                            <label><i class="fas fa-calendar"></i> TO DATE</label>
+                            <label>TO DATE</label>
                             <input type="date" name="to" class="form-control" required>
                         </div>
                         <div class="form-group">
-                            <label><i class="fas fa-map-marker-alt"></i> AREA</label>
-                            <select name="area_id" class="form-control" id="areaSelect" required>
-                                <option value="">-- Select Area --</option>
-                                @foreach ($locationAreas->groupBy('areas_name') as $areaName => $collectors)
-                                    <option value="{{ $collectors->first()->id }}">{{ $areaName }}</option>
-                                @endforeach
+                            <label>AREA</label>
+                            <select name="filter_area_id" class="form-control">
+                                <option value="{{ $areaId }}">{{ $areas_name }}</option>
                             </select>
                         </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="all_areas" value="1"
-                                id="allAreasCheck">
-                            <label class="form-check-label" for="allAreasCheck">
-                                [CLICK THIS BOX IF ALL AREAS]
-                            </label>
-                        </div>
+
                     </div>
                     <div class="modal-footer">
-                        <button type="submit" class="btn btn-primary"><i class="fas fa-print"></i> Print</button>
+                        <button type="submit" class="btn btn-primary">Print</button>
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
                     </div>
                 </form>
@@ -192,7 +224,6 @@
         </div>
     </div>
 
-    <!-- jQuery -->
     <script src="{{ asset('plugins/jquery/jquery.min.js') }}"></script>
     <script src="{{ asset('plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ asset('plugins/datatables/jquery.dataTables.min.js') }}"></script>
@@ -212,19 +243,11 @@
     <script>
         $(function() {
 
-            $('#manilaTable').DataTable({
+            $('#referencesTable').DataTable({
                 "paging": true,
                 "searching": true,
                 "ordering": true,
                 "responsive": true
-            });
-
-            $('#allAreasCheck').on('change', function() {
-                if ($(this).is(':checked')) {
-                    $('#areaSelect').prop('required', false).prop('disabled', true);
-                } else {
-                    $('#areaSelect').prop('required', true).prop('disabled', false);
-                }
             });
 
         });

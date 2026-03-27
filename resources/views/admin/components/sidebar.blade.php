@@ -19,75 +19,121 @@
 
         <nav class="mt-2 d-flex flex-column">
 
+            @php
+                $allAreas = \App\Models\Areas::query()
+                    ->select('id', 'location_name', 'areas_name')
+                    ->orderBy('location_name')
+                    ->orderBy('areas_name')
+                    ->get();
+                $areasByLocation = $allAreas->groupBy('location_name');
+                $isAreasActive = request()->routeIs('admin.areas.*', 'admin.area.*');
+                $currentLocation = request()->route('location');
+                $routeName = request()->route()?->getName();
+
+                if (!$currentLocation) {
+                    if (request()->routeIs('admin.areas.clients.page')) {
+                        $areaId = request()->route('id');
+                        $currentLocation = \App\Models\Areas::where('id', $areaId)->value('location_name');
+                    } elseif (request()->routeIs('admin.area.clients.add')) {
+                        $areaId = request()->route('id');
+                        $currentLocation = \App\Models\Areas::where('id', $areaId)->value('location_name');
+                    } elseif (
+                        request()->routeIs(
+                            'admin.area.clients.loans',
+                            'admin.area.clients.update',
+                            'admin.area.clients.renew.loan.add',
+                            'admin.area.clients.print_summary_loan',
+                        )
+                    ) {
+                        $clientId = request()->route('id');
+                        $areaId = \Illuminate\Support\Facades\DB::table('clients')
+                            ->where('id', $clientId)
+                            ->value('area_id');
+                        $currentLocation = \App\Models\Areas::where('id', $areaId)->value('location_name');
+                    } elseif (request()->routeIs('admin.area.clients.generate.soa')) {
+                        $loanId = request()->route('loanId');
+                        $clientId = \Illuminate\Support\Facades\DB::table('clients_loans')
+                            ->where('id', $loanId)
+                            ->value('client_id');
+                        $areaId = \Illuminate\Support\Facades\DB::table('clients')
+                            ->where('id', $clientId)
+                            ->value('area_id');
+                        $currentLocation = \App\Models\Areas::where('id', $areaId)->value('location_name');
+                    } elseif (
+                        request()->routeIs(
+                            'admin.areas.collections.references',
+                            'admin.areas.collections.summary.print',
+                        )
+                    ) {
+                        $areaId = request()->route('areaId');
+                        $currentLocation = \App\Models\Areas::where('id', $areaId)->value('location_name');
+                    } elseif (request()->routeIs('admin.collections.detail')) {
+                        $referenceNumber = request()->route('referenceNumber');
+                        $areaId = \Illuminate\Support\Facades\DB::table('clients_payments')
+                            ->where('reference_number', $referenceNumber)
+                            ->value('client_area');
+                        $currentLocation = \App\Models\Areas::where('id', $areaId)->value('location_name');
+                    } elseif (request()->routeIs('admin.collections.print', 'admin.collections.collect')) {
+                        $refNo = request()->route('refNo');
+                        $areaId = \Illuminate\Support\Facades\DB::table('clients_payments')
+                            ->where('reference_number', $refNo)
+                            ->value('client_area');
+                        $currentLocation = \App\Models\Areas::where('id', $areaId)->value('location_name');
+                    }
+                }
+            @endphp
+
             <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
                 data-accordion="false">
 
                 <li class="nav-item">
-                    <a href="{{ route('admin.dashboard.page') }}" class="nav-link active">
+                    <a href="{{ route('admin.dashboard.page') }}"
+                        class="nav-link {{ request()->routeIs('admin.dashboard.page') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-tachometer-alt"></i>
                         <p>Dashboard</p>
                     </a>
                 </li>
 
                 <li class="nav-item">
-                    <a href="{{ route('admin.secretary.page') }}" class="nav-link">
+                    <a href="{{ route('admin.secretary.page') }}"
+                        class="nav-link {{ request()->routeIs('admin.secretary.*') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-user-tie"></i>
                         <p>Secretary</p>
                     </a>
                 </li>
 
                 <li class="nav-item">
-                    <a href="{{ route('admin.collector.page') }}" class="nav-link">
+                    <a href="{{ route('admin.collector.page') }}"
+                        class="nav-link {{ request()->routeIs('admin.collector.*') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-hand-holding-usd"></i>
                         <p>Collector</p>
                     </a>
                 </li>
 
-                <li class="nav-item">
-                    <a href="#" class="nav-link">
+                <li class="nav-item {{ $isAreasActive ? 'menu-open' : '' }}">
+                    <a href="{{ route('admin.areas.page') }}" class="nav-link {{ $isAreasActive ? 'active' : '' }}">
                         <i class="nav-icon fas fa-map-marked-alt"></i>
                         <p>
                             Areas
                             <i class="fas fa-angle-left right"></i>
-                            <span class="badge badge-info right" style="background-color: #FF5F00;">4
-                                areas</span>
+                            <span class="badge badge-info right" style="background-color: #FF5F00;">
+                                {{ $allAreas->count() }} areas
+                            </span>
                         </p>
                     </a>
 
                     <ul class="nav nav-treeview">
-                        <li class="nav-item">
-                            <a href="{{ route('admin.manila.area.page') }}" class="nav-link">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>Manila</p>
-                            </a>
-                        </li>
-                    </ul>
-
-                    <ul class="nav nav-treeview">
-                        <li class="nav-item">
-                            <a href="#" class="nav-link">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>Valenzuela</p>
-                            </a>
-                        </li>
-                    </ul>
-
-                    <ul class="nav nav-treeview">
-                        <li class="nav-item">
-                            <a href="#" class="nav-link">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>Caloocan</p>
-                            </a>
-                        </li>
-                    </ul>
-
-                    <ul class="nav nav-treeview">
-                        <li class="nav-item">
-                            <a href="#" class="nav-link">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>FC</p>
-                            </a>
-                        </li>
+                        @forelse ($areasByLocation as $location => $areas)
+                            <li class="nav-item">
+                                <a href="{{ route('admin.areas.location.page', ['location' => $location]) }}"
+                                    class="nav-link {{ $currentLocation === $location ? 'active' : '' }}">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p style="font-size: 12px;">{{ $location }} ({{ $areas->count() }})</p>
+                                </a>
+                            </li>
+                        @empty
+                            <li class="nav-item px-3 py-2 text-muted small">No areas found</li>
+                        @endforelse
                     </ul>
 
                 </li>

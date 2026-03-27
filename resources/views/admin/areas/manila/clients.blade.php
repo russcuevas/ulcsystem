@@ -83,7 +83,7 @@
                 <div class="container-fluid">
                     <div class="row mb-2 align-items-center">
                         <div class="col-sm-6">
-                            <h1 class="m-0">Manila Area - [{{ $areas_name }}]</h1>
+                            <h1 class="m-0">{{ $location_name }} - [{{ $areas_name }}]</h1>
                         </div>
                     </div>
                 </div>
@@ -131,7 +131,7 @@
                                                     <td>{{ $client->address }}</td>
                                                     <td>{{ $client->gender }}</td>
                                                     <td>
-                                                        <a href="{{ route('admin.manila.area.clients.loans', $client->id) }}"
+                                                        <a href="{{ route('admin.area.clients.loans', $client->id) }}"
                                                             class="btn btn-sm btn-info">
                                                             <i class="fas fa-eye"></i> View Loans
                                                         </a>

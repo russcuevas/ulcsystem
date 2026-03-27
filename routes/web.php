@@ -6,6 +6,7 @@ use App\Http\Controllers\auth\AuthController;
 use App\Http\Controllers\admin\AdminCollectorController;
 use App\Http\Controllers\admin\AdminDashboardController;
 use App\Http\Controllers\admin\AdminSecretaryController;
+use App\Http\Controllers\admin\area\AdminCollectionController;
 use App\Http\Controllers\admin\area\AdminManilaClientsController;
 use App\Http\Controllers\admin\area\AdminManilaController;
 use App\Http\Controllers\collector\CollectorCollectionController;
@@ -61,27 +62,51 @@ Route::middleware('role:admin')->prefix('admin')->group(function () {
     Route::put('/collector/update/{id}', [AdminCollectorController::class, 'AdminUpdateCollector'])
         ->name('admin.collector.update');
 
-    // AREAS - MANILA
-    Route::get('/areas/manila', [AdminManilaController::class, 'AdminManilaPage'])
-        ->name('admin.manila.area.page');
+    // AREAS
+    Route::get('/areas', [AdminManilaController::class, 'AdminAreasPage'])
+        ->name('admin.areas.page');
 
-    Route::get('/areas/manila/clients/{id}', [AdminManilaClientsController::class, 'AdminManilaClientsPage'])
-        ->name('admin.manila.area.clients.page');
+    Route::post('/areas/sales-report', [AdminManilaController::class, 'AdminSalesReportPrint'])
+        ->name('admin.areas.sales.report.print');
 
-    Route::post('/areas/manila/clients/{id}/add', [AdminManilaClientsController::class, 'AdminManilaAddClientRequest'])
-        ->name('admin.manila.area.clients.add');
+    Route::get('/areas/clients/{id}', [AdminManilaClientsController::class, 'AdminManilaClientsPage'])
+        ->name('admin.areas.clients.page');
 
-    Route::get('/areas/manila/clients/{id}/loans', [AdminManilaClientsController::class, 'AdminManilaViewClientLoans'])
-        ->name('admin.manila.area.clients.loans');
+    Route::post('/areas/clients/{id}/add', [AdminManilaClientsController::class, 'AdminManilaAddClientRequest'])
+        ->name('admin.area.clients.add');
 
-    Route::put('/areas/manila/clients/{id}/update', [AdminManilaClientsController::class, 'AdminManilaUpdateClientRequest'])
-        ->name('admin.manila.area.clients.update');
+    Route::get('/areas/clients/{id}/loans', [AdminManilaClientsController::class, 'AdminManilaViewClientLoans'])
+        ->name('admin.area.clients.loans');
 
-    Route::post('/manila/clients/{id}/renew-loan', [AdminManilaClientsController::class, 'AdminManilaSubmitRenewLoan'])
-        ->name('admin.manila.area.clients.renew.loan.add');
+    Route::get('/areas/clients/{id}/print-summary-loan', [AdminManilaClientsController::class, 'AdminPrintSummaryLoan'])
+        ->name('admin.area.clients.print_summary_loan');
 
-    Route::get('/manila/clients/soa/{loanId}', [AdminManilaClientsController::class, 'AdminManilaGenerateSOA'])
-        ->name('admin.manila.area.clients.generate.soa');
+    Route::put('/areas/clients/{id}/update', [AdminManilaClientsController::class, 'AdminManilaUpdateClientRequest'])
+        ->name('admin.area.clients.update');
+
+    Route::post('/areas/clients/{id}/renew-loan', [AdminManilaClientsController::class, 'AdminManilaSubmitRenewLoan'])
+        ->name('admin.area.clients.renew.loan.add');
+
+    Route::get('/areas/clients/soa/{loanId}', [AdminManilaClientsController::class, 'AdminManilaGenerateSOA'])
+        ->name('admin.area.clients.generate.soa');
+
+    Route::get('/areas/{areaId}/collections', [AdminCollectionController::class, 'AdminCollectionReferencesPage'])
+        ->name('admin.areas.collections.references');
+
+    Route::get('/collections/{referenceNumber}', [AdminCollectionController::class, 'AdminCollectionDetailPage'])
+        ->name('admin.collections.detail');
+
+    Route::post('/areas/collections/collect/{refNo}', [AdminCollectionController::class, 'AdminCollectClientsPayment'])
+        ->name('admin.collections.collect');
+
+    Route::get('/collections/print/{refNo}', [AdminCollectionController::class, 'AdminPrintCollection'])
+        ->name('admin.collections.print');
+
+    Route::get('/areas/{areaId}/collections/summary-print', [AdminCollectionController::class, 'AdminPrintSummaryCollection'])
+        ->name('admin.areas.collections.summary.print');
+
+    Route::get('/areas/{location}', [AdminManilaController::class, 'AdminManilaPage'])
+        ->name('admin.areas.location.page');
 });
 
 // SECRETARY ROUTES

@@ -2,7 +2,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
 
-            <form action="{{ route('admin.manila.area.clients.update', $client->id) }}" method="POST">
+            <form action="{{ route('admin.area.clients.update', $client->id) }}" method="POST">
                 @csrf
                 @method('PUT')
 

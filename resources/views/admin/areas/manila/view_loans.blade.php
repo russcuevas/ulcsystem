@@ -82,7 +82,7 @@
                 <div class="container-fluid">
                     <div class="row mb-2 align-items-center">
                         <div class="col-sm-6">
-                            <h1 class="m-0">Manila Area - [{{ $areas_name }}]</h1>
+                            <h1 class="m-0">{{ $location_name }} - [{{ $areas_name }}]</h1>
                         </div>
                     </div>
                 </div>
@@ -146,9 +146,15 @@
                         <div class="col-md-9">
                             <div class="card card-primary card-outline">
                                 <div class="card-header">
-                                    <span>
-                                        <i class="fas fa-file-invoice-dollar"></i> Loan History
-                                    </span>
+                                    <div class="d-flex justify-content-between align-items-center w-100">
+                                        <span>
+                                            <i class="fas fa-file-invoice-dollar"></i> Loan History
+                                        </span>
+                                        <a href="{{ route('admin.area.clients.print_summary_loan', $client->id) }}"
+                                            target="_blank" class="btn btn-sm btn-info">
+                                            <i class="fas fa-print"></i> Print Summary Loan
+                                        </a>
+                                    </div>
                                 </div>
 
                                 <div class="card-body table-responsive">
@@ -199,7 +205,7 @@
                                                     </td>
 
                                                     <td>
-                                                        <a href="{{ route('admin.manila.area.clients.generate.soa', $loan->id) }}"
+                                                        <a href="{{ route('admin.area.clients.generate.soa', $loan->id) }}"
                                                             target="_blank" class="btn btn-sm btn-primary">
                                                             Generate SOA
                                                         </a>

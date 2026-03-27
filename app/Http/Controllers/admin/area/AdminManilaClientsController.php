@@ -13,12 +13,16 @@ class AdminManilaClientsController extends Controller
     {
         $clients = Clients::where('area_id', $id)->get();
 
-        $areas_name = DB::table('areas')
+        $area = DB::table('areas')
             ->where('id', $id)
-            ->value('areas_name') ?? 'Unknown Area';
+            ->select('areas_name', 'location_name')
+            ->first();
+
+        $areas_name = $area->areas_name ?? 'Unknown Area';
+        $location_name = $area->location_name ?? 'Unknown Location';
 
         // Pass the current area ID to the view
-        return view('admin.areas.manila.clients', compact('clients', 'areas_name', 'id'));
+        return view('admin.areas.manila.clients', compact('clients', 'areas_name', 'location_name', 'id'));
     }
 
     public function AdminManilaAddClientRequest(Request $request, $id)
@@ -78,26 +82,27 @@ class AdminManilaClientsController extends Controller
 
     public function AdminManilaViewClientLoans($id)
     {
-        $areas_name = DB::table('areas')
-            ->where('id', $id)
-            ->value('areas_name') ?? 'Unknown Area';
-
         $client = DB::table('clients')
             ->where('id', $id)
             ->first();
-
-        $loans = DB::table('clients_loans')
-            ->where('client_id', $id)
-            ->orderBy('created_at', 'desc')
-            ->get();
-
-
 
         if (!$client) {
             return redirect()->back()->with('error', 'Client not found.');
         }
 
-        return view('admin.areas.manila.view_loans', compact('areas_name', 'client', 'loans'));
+        $area = DB::table('areas')
+            ->where('id', $client->area_id)
+            ->select('areas_name', 'location_name')
+            ->first();
+
+        $areas_name = $area->areas_name ?? 'Unknown Area';
+        $location_name = $area->location_name ?? 'Unknown Location';
+
+        $loans = DB::table('clients_loans')
+            ->where('client_id', $id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+        return view('admin.areas.manila.view_loans', compact('areas_name', 'location_name', 'client', 'loans'));
     }
 
     public function AdminManilaUpdateClientRequest(Request $request, $id)
@@ -157,17 +162,19 @@ class AdminManilaClientsController extends Controller
 
     public function AdminManilaGenerateSOA($loanId)
     {
+        // Get loan
         $loan = DB::table('clients_loans')
             ->select(
                 'id',
                 'client_id',
-                'pn_number', // ✅ IMPORTANT
+                'pn_number',
                 'release_number',
                 'loan_amount',
                 'balance',
                 'daily',
                 'loan_from',
-                'loan_to'
+                'loan_to',
+                'loan_terms',
             )
             ->where('id', $loanId)
             ->first();
@@ -176,12 +183,18 @@ class AdminManilaClientsController extends Controller
             return back()->with('error', 'Loan not found.');
         }
 
-        // Get client
+        // Get client with area info
         $client = DB::table('clients')
-            ->where('id', $loan->client_id)
+            ->leftJoin('areas', 'clients.area_id', '=', 'areas.id')
+            ->where('clients.id', $loan->client_id)
+            ->select(
+                'clients.*',
+                'areas.location_name',
+                'areas.areas_name'
+            )
             ->first();
 
-        // Get payments related to this loan
+        // Get payments
         $payments = DB::table('clients_payments')
             ->where('client_loans_id', $loanId)
             ->orderBy('due_date', 'asc')
@@ -192,6 +205,41 @@ class AdminManilaClientsController extends Controller
             'loan',
             'client',
             'payments',
+        ));
+    }
+
+    public function AdminPrintSummaryLoan($clientId)
+    {
+        $client = DB::table('clients')
+            ->where('id', $clientId)
+            ->first();
+
+        if (!$client) {
+            return back()->with('error', 'Client not found.');
+        }
+
+        $area = DB::table('areas')
+            ->where('id', $client->area_id)
+            ->first();
+
+        $loans = DB::table('clients_loans')
+            ->where('client_id', $clientId)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $totalDaily = $loans->sum('daily');
+        $totalAmount = $loans->sum('loan_amount');
+        $newCount = $loans->where('loan_status', 'new')->count();
+        $renewalCount = $loans->where('loan_status', 'renewal')->count();
+
+        return view('admin.areas.print.print_summary_loan', compact(
+            'loans',
+            'client',
+            'area',
+            'totalDaily',
+            'totalAmount',
+            'newCount',
+            'renewalCount'
         ));
     }
 }

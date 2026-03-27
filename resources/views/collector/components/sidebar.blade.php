@@ -25,14 +25,16 @@
                 data-accordion="false">
 
                 <li class="nav-item">
-                    <a href="{{ route('collector.dashboard.page') }}" class="nav-link active">
+                    <a href="{{ route('collector.dashboard.page') }}"
+                        class="nav-link {{ request()->routeIs('collector.dashboard.*') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-tachometer-alt"></i>
                         <p>Dashboard</p>
                     </a>
                 </li>
 
                 <li class="nav-item">
-                    <a href="{{ route('collector.collections.page') }}" class="nav-link">
+                    <a href="{{ route('collector.collections.page') }}"
+                        class="nav-link {{ request()->routeIs('collector.collections.*') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-hand-holding-usd"></i>
                         <p>Collections</p>
                     </a>

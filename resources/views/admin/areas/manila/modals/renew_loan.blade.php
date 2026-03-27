@@ -1,6 +1,7 @@
-<div class="modal fade" id="renewLoanModal" tabindex="-1" role="dialog" aria-labelledby="renewLoanModalLabel" aria-hidden="true">
+<div class="modal fade" id="renewLoanModal" tabindex="-1" role="dialog" aria-labelledby="renewLoanModalLabel"
+    aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
-        <form action="{{ route('admin.manila.area.clients.renew.loan.add', $client->id) }}" method="POST">
+        <form action="{{ route('admin.area.clients.renew.loan.add', $client->id) }}" method="POST">
             @csrf
 
             <div class="modal-content">
@@ -37,12 +38,14 @@
 
                             <div class="form-group">
                                 <label>Gender</label>
-                                <input type="text" class="form-control" value="{{ ucfirst($client->gender) }}" readonly>
+                                <input type="text" class="form-control" value="{{ ucfirst($client->gender) }}"
+                                    readonly>
                             </div>
 
                             <div class="form-group">
                                 <label>Date Approved</label>
-                                <input type="text" class="form-control" value="{{ \Carbon\Carbon::parse($client->created_at)->format('F d, Y') }}" readonly>
+                                <input type="text" class="form-control"
+                                    value="{{ \Carbon\Carbon::parse($client->created_at)->format('F d, Y') }}" readonly>
                             </div>
                         </div>
 
@@ -74,23 +77,27 @@
                             <div class="form-row">
                                 <div class="form-group col-md-6">
                                     <label>Loan Amount *</label>
-                                    <input type="number" name="loan_amount" class="form-control" min="1" step="0.01" required>
+                                    <input type="number" name="loan_amount" class="form-control" min="1"
+                                        step="0.01" required>
                                 </div>
 
                                 <div class="form-group col-md-6">
                                     <label>Balance *</label>
-                                    <input type="number" name="balance" class="form-control" min="0" step="0.01" required value="0">
+                                    <input type="number" name="balance" class="form-control" min="0"
+                                        step="0.01" required value="0">
                                 </div>
                             </div>
 
                             <div class="form-group">
                                 <label>Daily Payment *</label>
-                                <input type="number" name="daily" class="form-control" min="0" step="0.01" required>
+                                <input type="number" name="daily" class="form-control" min="0" step="0.01"
+                                    required>
                             </div>
 
                             <div class="form-group">
                                 <label>Loan Terms</label>
-                                <input type="text" name="loan_terms" class="form-control bg-gray text-white" value="100" readonly>
+                                <input type="text" name="loan_terms" class="form-control bg-gray text-white"
+                                    value="100" readonly>
                             </div>
                         </div>
 
