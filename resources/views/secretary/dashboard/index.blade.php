@@ -66,18 +66,8 @@
 
         {{-- MAIN --}}
         <div class="content-wrapper">
-            <div class="content-header">
-                <div class="container-fluid">
-                    <div class="row mb-2 align-items-center">
-                        <div class="col-sm-6">
-                            <h1 class="m-0">Secretary Dashboard</h1>
-                        </div>
-                        <div class="col-sm-6 text-sm-right">
-                            <h5 class="m-0" id="manila-time"></h5>
-                        </div>
-                    </div>
-                </div>
-            </div>
+
+
 
             <div class="content-header">
                 <div class="container-fluid">
@@ -85,62 +75,95 @@
                         <div class="col-sm-6">
                             <h1 class="m-0">Manila Area</h1>
                         </div>
+                        <div class="col-sm-6 text-sm-right">
+                            <p class="m-0"><strong>Showing:</strong>
+                                @if (isset($showAllTime) && $showAllTime)
+                                    All breakdown
+                                @else
+                                    From {{ $from ?? now()->startOfMonth()->format('Y-m-d') }} to
+                                    {{ $to ?? now()->endOfMonth()->format('Y-m-d') }}
+                                @endif
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
 
+            <div class="content-header">
+                <div class="container-fluid">
+                    <form action="{{ route('secretary.dashboard.page') }}" method="GET" class="row g-2">
+                        <div class="col-sm-4">
+                            <label>From</label>
+                            <input type="date" name="from" class="form-control"
+                                value="{{ request('from', now()->startOfMonth()->format('Y-m-d')) }}" required>
+                        </div>
+                        <div class="col-sm-4">
+                            <label>To</label>
+                            <input type="date" name="to" class="form-control"
+                                value="{{ request('to', now()->endOfMonth()->format('Y-m-d')) }}" required>
+                        </div>
+                        <div class="col-sm-4 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary">Filter</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
             <!-- Main content -->
             <section class="content">
                 <div class="container-fluid">
-                    <div class="row">
-                        <!-- Loans box -->
-                        <div class="col-lg-4 col-6">
-                            <div class="small-box bg-light" style="border-top: 4px solid #FF5F00;">
-                                <div class="inner" style="color: #FF5F00;">
-                                    <h3>150</h3>
-                                    <p>Loans</p>
+                    @if (isset($areaSummaries) && $areaSummaries->count())
+                        @foreach ($areaSummaries as $area)
+                            <div class="row mb-3">
+                                <div class="col-12">
+                                    <div class="card card-outline">
+                                        <div class="card-header d-flex align-items-center">
+                                            <h5 class="mb-0">{{ $area->areas_name }} <small
+                                                    class="text-muted">({{ $area->location_name }})</small></h5>
+                                            <a href="{{ route('secretary.areas.collections.references', $area->id) }}"
+                                                class="btn btn-sm btn-success ml-auto">View Payment References</a>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-4 col-sm-6 mb-2">
+                                                    <div class="small-box bg-light"
+                                                        style="border-top: 4px solid #FF5F00;">
+                                                        <div class="inner" style="color: #FF5F00;">
+                                                            <h3>₱{{ number_format($area->total_loans_amount, 2) }}</h3>
+                                                            <p>Total Loans</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4 col-sm-6 mb-2">
+                                                    <div class="small-box bg-light"
+                                                        style="border-top: 4px solid #FF5F00;">
+                                                        <div class="inner" style="color: #FF5F00;">
+                                                            <h3>₱{{ number_format($area->total_collectibles, 2) }}</h3>
+                                                            <p>Total Collectibles</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4 col-sm-6 mb-2">
+                                                    <div class="small-box bg-light"
+                                                        style="border-top: 4px solid #FF5F00;">
+                                                        <div class="inner" style="color: #FF5F00;">
+                                                            <h3>₱{{ number_format($area->total_collected, 2) }}</h3>
+                                                            <p>Total Collections</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="icon">
-                                    <i class="fas fa-money-bill-wave" style="color: #FF5F00;"></i>
-                                </div>
-                                <a href="#" class="small-box-footer">
-                                    More info <i class="fas fa-arrow-circle-right" style="color: #FF5F00;"></i>
-                                </a>
+                            </div>
+                        @endforeach
+                    @else
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="alert alert-info">No areas found. Please add area records.</div>
                             </div>
                         </div>
-
-                        <!-- Clients box -->
-                        <div class="col-lg-4 col-6">
-                            <div class="small-box bg-light" style="border-top: 4px solid #FF5F00;">
-                                <div class="inner" style="color: #FF5F00;">
-                                    <h3>53<sup style="font-size: 20px">%</sup></h3>
-                                    <p>Users</p>
-                                </div>
-                                <div class="icon">
-                                    <i class="fas fa-users" style="color: #FF5F00;"></i>
-                                </div>
-                                <a href="#" class="small-box-footer">
-                                    More info <i class="fas fa-arrow-circle-right" style="color: #FF5F00;"></i>
-                                </a>
-                            </div>
-                        </div>
-
-                        <!-- Collected box -->
-                        <div class="col-lg-4 col-6">
-                            <div class="small-box bg-light" style="border-top: 4px solid #FF5F00;">
-                                <div class="inner" style="color: #FF5F00;">
-                                    <h3>44</h3>
-                                    <p>Collected</p>
-                                </div>
-                                <div class="icon">
-                                    <i class="fas fa-hand-holding-usd" style="color: #FF5F00;"></i>
-                                </div>
-                                <a href="#" class="small-box-footer">
-                                    More info <i class="fas fa-arrow-circle-right" style="color: #FF5F00;"></i>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
+                    @endif
                 </div>
             </section>
         </div>

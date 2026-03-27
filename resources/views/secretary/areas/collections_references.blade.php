@@ -135,7 +135,13 @@
 
                     <div class="card card-primary card-outline">
                         <div class="card-header">
-                            <h3 class="card-title">Payment References - {{ $areas_name }}</h3>
+                            <div class="d-flex align-items-center justify-content-between w-100">
+                                <h3 class="card-title mb-0">Payment References - {{ $areas_name }}</h3>
+                                <button type="button" class="btn btn-info btn-sm" data-toggle="modal"
+                                    data-target="#printSummaryModal">
+                                    <i class="fas fa-print"></i> Print Summary
+                                </button>
+                            </div>
                         </div>
                         <div class="card-body">
                             <table id="referencesTable" class="table table-bordered table-hover">
@@ -179,6 +185,45 @@
     </div>
 
     <!-- jQuery -->
+    <!-- Print Summary Modal -->
+    <div class="modal fade" id="printSummaryModal" tabindex="-1" role="dialog"
+        aria-labelledby="printSummaryModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <form action="{{ route('secretary.areas.collections.summary.print', $areaId) }}" method="GET"
+                    target="_blank">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="printSummaryModalLabel"><i class="fas fa-print"></i> Print Summary
+                            Collection Report</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                aria-hidden="true">&times;</span></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label>FROM DATE</label>
+                            <input type="date" name="from" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label>TO DATE</label>
+                            <input type="date" name="to" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label>AREA</label>
+                            <select name="filter_area_id" class="form-control">
+                                <option value="{{ $areaId }}">{{ $areas_name }}</option>
+                            </select>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Print</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script src="{{ asset('plugins/jquery/jquery.min.js') }}"></script>
     <script src="{{ asset('plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ asset('plugins/datatables/jquery.dataTables.min.js') }}"></script>

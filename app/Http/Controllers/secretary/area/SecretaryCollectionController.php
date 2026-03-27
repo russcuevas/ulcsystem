@@ -196,142 +196,141 @@ class SecretaryCollectionController extends Controller
     }
 
     public function SecretaryCollectClientsPayment(Request $request, $refNo)
-{
-    $secretary = Session::get('user');
-    if (!$secretary) {
-        return response()->json(['message' => 'Unauthorized'], 401);
-    }
+    {
+        $secretary = Session::get('user');
+        if (!$secretary) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
 
-    $action = $request->input('action');
+        $action = $request->input('action');
 
-    // Get reference to find area and date
-    $reference = DB::table('clients_payments')->where('reference_number', $refNo)->first();
-    if (!$reference) {
-        return response()->json(['message' => 'Reference not found'], 404);
-    }
+        // Get reference to find area and date
+        $reference = DB::table('clients_payments')->where('reference_number', $refNo)->first();
+        if (!$reference) {
+            return response()->json(['message' => 'Reference not found'], 404);
+        }
 
-    $selectedDate = $reference->due_date;
-    $areaId = $reference->client_area;
+        $selectedDate = $reference->due_date;
+        $areaId = $reference->client_area;
 
-    // Get collector for this area
-    $collector = DB::table('areas')
-        ->where('id', $areaId)
-        ->value('collector_id');
-
-    // -----------------------------
-    // Fetch loans depending on action
-    // -----------------------------
-    if ($action === 'no_payment') {
-        $loans = DB::table('clients_loans as cl')
-            ->join('clients as c', 'cl.client_id', '=', 'c.id')
-            ->where('c.area_id', $areaId)
-            ->where('cl.balance', '>', 0)
-            ->select('cl.*', 'c.id as client_id')
-            ->get();
-    } else {
-        $loans = DB::table('clients_loans as cl')
-            ->join('clients as c', 'cl.client_id', '=', 'c.id')
-            ->where('c.area_id', $areaId)
-            ->where('cl.balance', '>', 0)
-            ->whereDate('cl.loan_from', '<=', $selectedDate)
-            ->select('cl.*', 'c.id as client_id')
-            ->get();
-    }
-
-    // Fetch all existing payments
-    $payments = DB::table('clients_payments')
-        ->where('reference_number', $refNo)
-        ->whereIn('client_id', $loans->pluck('client_id'))
-        ->get()
-        ->keyBy('client_id');
-
-    foreach ($loans as $loan) {
-
-        $payment = $payments[$loan->client_id] ?? null;
-
-        // ✅ COMPUTE LAPSED STATUS
-        $isLapsed = \Carbon\Carbon::parse($selectedDate)
-            ->gt(\Carbon\Carbon::parse($loan->loan_to)) ? 1 : 0;
+        // Get collector for this area
+        $collector = DB::table('areas')
+            ->where('id', $areaId)
+            ->value('collector_id');
 
         // -----------------------------
-        // Handle "No Payment"
+        // Fetch loans depending on action
         // -----------------------------
         if ($action === 'no_payment') {
+            $loans = DB::table('clients_loans as cl')
+                ->join('clients as c', 'cl.client_id', '=', 'c.id')
+                ->where('c.area_id', $areaId)
+                ->where('cl.balance', '>', 0)
+                ->select('cl.*', 'c.id as client_id')
+                ->get();
+        } else {
+            $loans = DB::table('clients_loans as cl')
+                ->join('clients as c', 'cl.client_id', '=', 'c.id')
+                ->where('c.area_id', $areaId)
+                ->where('cl.balance', '>', 0)
+                ->whereDate('cl.loan_from', '<=', $selectedDate)
+                ->select('cl.*', 'c.id as client_id')
+                ->get();
+        }
 
-            if (\Carbon\Carbon::parse($loan->loan_from)->lte($selectedDate)) {
+        // Fetch all existing payments
+        $payments = DB::table('clients_payments')
+            ->where('reference_number', $refNo)
+            ->whereIn('client_id', $loans->pluck('client_id'))
+            ->get()
+            ->keyBy('client_id');
 
-                if (!$payment) {
+        foreach ($loans as $loan) {
 
-                    DB::table('clients_payments')->insert([
-                        'reference_number' => (string) $refNo,
-                        'client_id' => $loan->client_id,
-                        'client_loans_id' => $loan->id,
-                        'client_area' => $areaId,
-                        'collection' => 0,
-                        'type' => 'NO PAYMENT',
-                        'is_lapsed' => $isLapsed,
-                        'is_collected' => 1,
-                        'due_date' => $selectedDate,
-                        'daily' => $loan->daily ?? 0,
-                        'old_balance' => $loan->balance ?? 0,
-                        'created_by' => $secretary->id,
-                        'collected_by' => $collector,
-                        'created_at' => now(),
-                        'updated_at' => now()
-                    ]);
+            $payment = $payments[$loan->client_id] ?? null;
 
-                } else {
+            // ✅ COMPUTE LAPSED STATUS
+            $isLapsed = \Carbon\Carbon::parse($selectedDate)
+                ->gt(\Carbon\Carbon::parse($loan->loan_to)) ? 1 : 0;
 
-                    if (($payment->collection === null || $payment->collection == 0) && $payment->type !== 'NO PAYMENT') {
+            // -----------------------------
+            // Handle "No Payment"
+            // -----------------------------
+            if ($action === 'no_payment') {
 
-                        DB::table('clients_payments')
-                            ->where('id', $payment->id)
-                            ->update([
-                                'type' => 'NO PAYMENT',
-                                'is_lapsed' => $isLapsed,
-                                'is_collected' => 1,
-                                'updated_at' => now()
-                            ]);
+                if (\Carbon\Carbon::parse($loan->loan_from)->lte($selectedDate)) {
+
+                    if (!$payment) {
+
+                        DB::table('clients_payments')->insert([
+                            'reference_number' => (string) $refNo,
+                            'client_id' => $loan->client_id,
+                            'client_loans_id' => $loan->id,
+                            'client_area' => $areaId,
+                            'collection' => 0,
+                            'type' => 'NO PAYMENT',
+                            'is_lapsed' => $isLapsed,
+                            'is_collected' => 1,
+                            'due_date' => $selectedDate,
+                            'daily' => $loan->daily ?? 0,
+                            'old_balance' => $loan->balance ?? 0,
+                            'created_by' => $secretary->id,
+                            'collected_by' => $collector,
+                            'created_at' => now(),
+                            'updated_at' => now()
+                        ]);
+                    } else {
+
+                        if (($payment->collection === null || $payment->collection == 0) && $payment->type !== 'NO PAYMENT') {
+
+                            DB::table('clients_payments')
+                                ->where('id', $payment->id)
+                                ->update([
+                                    'type' => 'NO PAYMENT',
+                                    'is_lapsed' => $isLapsed,
+                                    'is_collected' => 1,
+                                    'updated_at' => now()
+                                ]);
+                        }
                     }
+                }
+            }
+
+            // -----------------------------
+            // Handle "Collect"
+            // -----------------------------
+            if ($action === 'collect') {
+
+                if ($payment && $payment->collection > 0 && $payment->is_collected == 0) {
+
+                    $newBalance = $loan->balance - $payment->collection;
+                    $newBalance = max($newBalance, 0);
+
+                    DB::table('clients_payments')
+                        ->where('id', $payment->id)
+                        ->update([
+                            'is_collected' => 1,
+                            'is_lapsed' => $isLapsed,
+                            'updated_at' => now()
+                        ]);
+
+                    DB::table('clients_loans')
+                        ->where('id', $loan->id)
+                        ->update([
+                            'balance' => $newBalance,
+                            'status' => $newBalance <= 0 ? 'paid' : 'unpaid',
+                            'updated_at' => now()
+                        ]);
                 }
             }
         }
 
-        // -----------------------------
-        // Handle "Collect"
-        // -----------------------------
-        if ($action === 'collect') {
+        $msg = $action === 'collect'
+            ? 'Payment collected successfully for all applicable clients.'
+            : 'All clients without payment are now tagged as NO PAYMENT.';
 
-            if ($payment && $payment->collection > 0 && $payment->is_collected == 0) {
-
-                $newBalance = $loan->balance - $payment->collection;
-                $newBalance = max($newBalance, 0);
-
-                DB::table('clients_payments')
-                    ->where('id', $payment->id)
-                    ->update([
-                        'is_collected' => 1,
-                        'is_lapsed' => $isLapsed,
-                        'updated_at' => now()
-                    ]);
-
-                DB::table('clients_loans')
-                    ->where('id', $loan->id)
-                    ->update([
-                        'balance' => $newBalance,
-                        'status' => $newBalance <= 0 ? 'paid' : 'unpaid',
-                        'updated_at' => now()
-                    ]);
-            }
-        }
+        return response()->json(['message' => $msg]);
     }
-
-    $msg = $action === 'collect'
-        ? 'Payment collected successfully for all applicable clients.'
-        : 'All clients without payment are now tagged as NO PAYMENT.';
-
-    return response()->json(['message' => $msg]);
-}
 
     public function SecretaryPrintCollection($refNo)
     {
@@ -384,6 +383,158 @@ class SecretaryCollectionController extends Controller
             'payments' => $payments,
             'area' => $area,
             'referenceNumber' => $refNo
+        ]);
+    }
+
+    public function SecretaryPrintSummaryCollection(Request $request, $areaId)
+    {
+        $secretary = Session::get('user');
+        if (!$secretary) {
+            return redirect('/login')->with('error', 'Please login first');
+        }
+
+        $secretary_id = $secretary->id;
+
+        // Get area
+        $area = DB::table('areas')
+            ->where('id', $areaId)
+            ->where('secretary_id', $secretary_id)
+            ->first();
+
+        if (!$area) {
+            abort(403, 'Unauthorized or area not found.');
+        }
+
+        $allAreas = $request->query('all_areas') == 1;
+        $from = $request->query('from');
+        $to = $request->query('to');
+        $filterAreaId = $request->query('filter_area_id', $areaId);
+
+        if ($allAreas) {
+            $areaIds = DB::table('areas')
+                ->where('secretary_id', $secretary_id)
+                ->pluck('id')
+                ->toArray();
+
+            $area = (object)[
+                'areas_name' => 'All Areas',
+                'location_name' => 'All Locations',
+                'area_name' => 'All Areas'
+            ];
+        } else {
+            $selectedArea = DB::table('areas')
+                ->where('id', $filterAreaId)
+                ->where('secretary_id', $secretary_id)
+                ->first();
+
+            if (!$selectedArea) {
+                abort(403, 'Selected area unauthorized or not found.');
+            }
+
+            $areaIds = [$selectedArea->id];
+            $area = $selectedArea;
+            $area->area_name = $area->areas_name;
+        }
+
+        $references = DB::table('clients_payments as cp')
+            ->select(
+                'cp.reference_number',
+                'cp.due_date',
+                DB::raw('MAX(cp.collected_by) as collected_by'),
+                DB::raw('COUNT(DISTINCT cp.client_id) as total_clients'),
+                DB::raw('SUM(cp.daily) as total_daily_collectibles'),
+                DB::raw('SUM(cp.collection) as total_collections')
+            )
+            ->whereIn('cp.client_area', $areaIds)
+            ->when($from && $to, function ($query) use ($from, $to) {
+                return $query->whereBetween('cp.due_date', [$from, $to]);
+            })
+            ->groupBy('cp.reference_number', 'cp.due_date')
+            ->orderBy('cp.due_date', 'desc')
+            ->get();
+
+        // Count total clients per reference (filtered like SecretaryCollectionDetailPage)
+        $references = $references->map(function ($ref) use ($areaIds) {
+            $loans = DB::table('clients_loans as cl')
+                ->join('clients as c', 'cl.client_id', '=', 'c.id')
+                ->whereIn('c.area_id', $areaIds)
+                ->whereDate('cl.loan_from', '<=', $ref->due_date)
+                ->select('cl.*', 'c.id as client_id')
+                ->get();
+
+            $payments = DB::table('clients_payments')
+                ->where('reference_number', $ref->reference_number)
+                ->whereIn('client_id', $loans->pluck('client_id'))
+                ->get()
+                ->keyBy('client_id');
+
+            $filteredClients = $loans->filter(function ($loan) use ($payments) {
+                $balance = $loan->balance ?? 0;
+                $payment = $payments[$loan->client_id] ?? null;
+
+                return $balance > 0 || ($balance <= 0 && $payment && ($payment->collection ?? 0) > 0);
+            });
+
+            $ref->total_clients = $filteredClients->count();
+            $ref->total_daily_collectibles = $filteredClients->sum(function ($loan) {
+                return $loan->daily ?? 0;
+            });
+            $ref->total_collections = $filteredClients->sum(function ($loan) use ($payments) {
+                $payment = $payments[$loan->client_id] ?? null;
+                return $payment ? ($payment->collection ?? 0) : 0;
+            });
+
+            $collector = DB::table('collectors')->where('id', $ref->collected_by)->first();
+            $ref->collected_by_name = $collector ? $collector->fullname : 'N/A';
+
+            $ref->cash_count = DB::table('clients_payments')
+                ->where('reference_number', $ref->reference_number)
+                ->where('type', 'cash')
+                ->count();
+
+            $ref->advance_count = DB::table('clients_payments')
+                ->where('reference_number', $ref->reference_number)
+                ->where('type', 'advance')
+                ->count();
+
+            $ref->gcash_count = DB::table('clients_payments')
+                ->where('reference_number', $ref->reference_number)
+                ->where('type', 'gcash')
+                ->count();
+
+            $ref->cheque_count = DB::table('clients_payments')
+                ->where('reference_number', $ref->reference_number)
+                ->where('type', 'cheque')
+                ->count();
+
+            $ref->no_payment_count = DB::table('clients_payments')
+                ->where('reference_number', $ref->reference_number)
+                ->where('is_collected', 0)
+                ->count();
+
+            $ref->total_accounts = $ref->total_clients;
+            $ref->active_amount = $ref->total_daily_collectibles;
+            $ref->total_collection = $ref->total_collections;
+            $ref->collected_by = $ref->collected_by_name;
+
+            return $ref;
+        });
+
+        if (!$from || !$to) {
+            $from = $references->min('due_date') ? $references->min('due_date') : now()->format('Y-m-d');
+            $to = $references->max('due_date') ? $references->max('due_date') : now()->format('Y-m-d');
+        }
+
+        $location_name = $area->location_name;
+        $areas_name = $area->areas_name;
+
+        return view('secretary.areas.print.print_summary_collection', [
+            'payments' => $references,
+            'area' => $area,
+            'from' => $from,
+            'to' => $to,
+            'location_name' => $location_name,
+            'areas_name' => $areas_name
         ]);
     }
 }

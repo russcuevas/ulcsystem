@@ -142,29 +142,31 @@
     <!-- Print Sales Modal -->
     <div class="modal fade" id="printSalesModal" tabindex="-1" role="dialog" aria-labelledby="printSalesModalLabel"
         aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <form action="{{ route('secretary.areas.sales.report.print') }}" method="POST" target="_blank">
                     @csrf
                     <div class="modal-header">
-                        <h5 class="modal-title" id="printSalesModalLabel"><i class="fas fa-print"></i> Print Sales
-                            Reports</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
-                                aria-hidden="true">&times;</span></button>
+                        <h5 class="modal-title" id="printSalesModalLabel">
+                            <i class="fas fa-print"></i> Print Sales Reports
+                        </h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
                     </div>
                     <div class="modal-body">
-                        <div class="mb-3">
-                            <label class="form-label">FROM DATE</label>
+                        <div class="form-group">
+                            <label><i class="fas fa-calendar"></i> FROM DATE</label>
                             <input type="date" name="from" class="form-control" required>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">TO DATE</label>
+                        <div class="form-group">
+                            <label><i class="fas fa-calendar"></i> TO DATE</label>
                             <input type="date" name="to" class="form-control" required>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">AREA</label>
-                            <select name="area_id" class="form-select">
-                                <option value="">Select Area</option>
+                        <div class="form-group">
+                            <label><i class="fas fa-map-marker-alt"></i> AREA</label>
+                            <select name="area_id" class="form-control" id="areaSelect" required>
+                                <option value="">-- Select Area --</option>
                                 @foreach ($areas as $area)
                                     <option value="{{ $area->id }}">{{ $area->areas_name }}</option>
                                 @endforeach
@@ -173,12 +175,14 @@
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" name="all_areas" value="1"
                                 id="allAreasCheck">
-                            <label class="form-check-label" for="allAreasCheck">(CLICK THIS BOX IF ALL AREAS)</label>
+                            <label class="form-check-label" for="allAreasCheck">
+                                [CLICK THIS BOX IF ALL AREAS]
+                            </label>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="submit" class="btn btn-primary">Print</button>
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-print"></i> Print</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
                     </div>
                 </form>
             </div>
@@ -240,6 +244,27 @@
                 "responsive": true
             });
 
+            $('#allAreasCheck').on('change', function() {
+                if ($(this).is(':checked')) {
+                    $('#areaSelect').prop('required', false).prop('disabled', true);
+                } else {
+                    $('#areaSelect').prop('required', true).prop('disabled', false);
+                }
+            });
+            // Pre-select area when opened from a row button
+            $(document).on('click', '.btn-print-sales', function() {
+                var areaId = $(this).data('area-id');
+                $('#areaSelect').val(areaId).prop('disabled', false).prop('required', true);
+                $('#allAreasCheck').prop('checked', false);
+            });
+
+            // Reset modal when opened from top card-tools button (no area pre-selected)
+            $('#printSalesModal').on('show.bs.modal', function(e) {
+                if (!$(e.relatedTarget).hasClass('btn-print-sales')) {
+                    $('#areaSelect').val('').prop('disabled', false).prop('required', true);
+                    $('#allAreasCheck').prop('checked', false);
+                }
+            });
         });
     </script>
 </body>

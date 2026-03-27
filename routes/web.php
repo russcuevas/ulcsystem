@@ -102,9 +102,10 @@ Route::middleware('role:secretary')->prefix('secretary')->name('secretary.')->gr
     Route::get('/areas', [SecretaryAreaController::class, 'SecretaryAreasPage'])
         ->name('areas.page');
 
-    // SALES REPORT
+    // SALES REPORT (modal post)
     Route::post('/areas/sales-report', [SecretaryAreaController::class, 'SecretarySalesReportPrint'])
         ->name('areas.sales.report.print');
+
 
     // AREAS CLIENTS PAGE
 
@@ -140,11 +141,14 @@ Route::middleware('role:secretary')->prefix('secretary')->name('secretary.')->gr
 
     Route::post('/areas/collections/collect/{refNo}', [SecretaryCollectionController::class, 'SecretaryCollectClientsPayment'])
         ->name('collections.collect');
-    
+
     // PRINT COLLECTION
     Route::get('/collections/print/{refNo}', [SecretaryCollectionController::class, 'SecretaryPrintCollection'])
         ->name('collections.print');
 
+    // PRINT SUMMARY COLLECTION
+    Route::get('/areas/{areaId}/collections/summary-print', [SecretaryCollectionController::class, 'SecretaryPrintSummaryCollection'])
+        ->name('areas.collections.summary.print');
 });
 
 // COLLECTOR ROUTES
@@ -159,6 +163,4 @@ Route::middleware('role:collector')->prefix('collector')->name('collector.')->gr
         ->name('collections.page');
     Route::post('/collections/store', [CollectorCollectionController::class, 'CollectorCollectPaymentRequest'])
         ->name('collections.store');
-
-    
 });
