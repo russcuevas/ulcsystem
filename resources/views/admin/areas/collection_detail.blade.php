@@ -311,33 +311,45 @@
                                             {{-- Collection --}}
                                             <td>
                                                 @if ($client->payment)
-                                                    ₱{{ number_format($client->payment->collection ?? 0, 2) }}
+                                                    @if (is_null($client->payment->collection))
+                                                        -
+                                                    @else
+                                                        ₱{{ number_format($client->payment->collection, 2) }}
+                                                    @endif
                                                 @else
                                                     -
                                                 @endif
                                             </td>
 
                                             {{-- Type --}}
-                                            <td>{{ $client->payment->type ?? '-' }}</td>
+                                            <td>
+                                                @if ($client->payment)
+                                                    {{ $client->payment->type ?? '-' }}
+                                                @else
+                                                    -
+                                                @endif
+                                            </td>
 
                                             {{-- STATUS --}}
                                             <td>
-                                                {{-- ✅ PRIORITY: PAID --}}
                                                 @if ($isPaid)
                                                     <span class="badge badge-primary">Paid Loan</span>
-
-                                                    {{-- WITH PAYMENT --}}
                                                 @elseif ($client->payment)
-                                                    @if ($client->payment->type === 'NO PAYMENT' || $client->payment->collection == 0)
+                                                    @php
+                                                        $col = $client->payment->collection;
+                                                        $type = $client->payment->type;
+                                                    @endphp
+
+                                                    {{-- If both collection and type are null, show no status --}}
+                                                    @if (is_null($col) && is_null($type))
+                                                        {{-- blank status --}}
+                                                    @elseif ($type === 'NO PAYMENT')
                                                         <span class="badge badge-danger">No Payment</span>
                                                     @elseif ($client->payment->is_collected == 1)
                                                         <span class="badge badge-success">Collected</span>
-                                                    @else
+                                                    @elseif (!is_null($col) && $col > 0 && $client->payment->is_collected == 0)
                                                         <span class="badge badge-info">To Collect</span>
                                                     @endif
-
-                                                    {{-- NO PAYMENT RECORD --}}
-                                                @else
                                                 @endif
                                             </td>
                                         </tr>
@@ -380,18 +392,24 @@
             $('#collectionForm').submit(function(e) {
                 let action = $('#actionInput').val();
 
-                if (action === 'collect' || action === 'no_payment') {
+                // Handle collect, no_payment and reminder via AJAX to avoid full-page JSON responses
+                if (action === 'collect' || action === 'no_payment' || action === 'reminder') {
                     e.preventDefault();
 
-                    let title = action === 'collect' ?
-                        'Are you sure?' :
-                        'Are you sure you want to mark as NO PAYMENT?';
-                    let text = action === 'collect' ?
-                        'This will mark all clients with a collection as collected!' :
-                        'This will tag all clients without payment as NO PAYMENT!';
-                    let confirmText = action === 'collect' ?
-                        'Yes, collect now!' :
-                        'Yes, mark as NO PAYMENT!';
+                    let title = 'Are you sure?';
+                    let text = '';
+                    let confirmText = '';
+
+                    if (action === 'collect') {
+                        text = 'This will mark all clients with a collection as collected!';
+                        confirmText = 'Yes, collect now!';
+                    } else if (action === 'no_payment') {
+                        text = 'This will tag all clients without payment as NO PAYMENT!';
+                        confirmText = 'Yes, mark as NO PAYMENT!';
+                    } else if (action === 'reminder') {
+                        text = 'This will send SMS reminders to clients who have no payment recorded for this reference.';
+                        confirmText = 'Yes, send reminders!';
+                    }
 
                     Swal.fire({
                         title: title,
@@ -408,16 +426,15 @@
                                 method: "POST",
                                 data: $(this).serialize(),
                                 success: function(response) {
+                                    let successTitle = action === 'collect' ? 'Collected!' : (action === 'no_payment' ? 'Tagged!' : 'Reminders Sent!');
                                     Swal.fire(
-                                        action === 'collect' ? 'Collected!' :
-                                        'Tagged!',
+                                        successTitle,
                                         response.message,
                                         'success'
                                     ).then(() => location.reload());
                                 },
                                 error: function(err) {
-                                    Swal.fire('Error!', 'Something went wrong.',
-                                        'error');
+                                    Swal.fire('Error!', 'Something went wrong.', 'error');
                                 }
                             });
                         }

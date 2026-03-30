@@ -228,24 +228,29 @@
                                                     </td>
 
                                                     {{-- Collection --}}
-                                                    @if ($client->payment)
-                                                        <td>₱{{ number_format($client->payment->collection, 2) }}</td>
-                                                        <td>{{ $client->payment->type }}</td>
+                                                    @if ($client->payment && !(is_null($client->payment->collection) && is_null($client->payment->type)))
+                                                        <td>
+                                                            @if (is_null($client->payment->collection))
+                                                                -
+                                                            @else
+                                                                ₱{{ number_format($client->payment->collection, 2) }}
+                                                            @endif
+                                                        </td>
+
+                                                        <td>
+                                                            {{ $client->payment->type ?? '-' }}
+                                                        </td>
 
                                                         {{-- STATUS --}}
                                                         <td>
                                                             @if ($client->isPaid)
                                                                 <span class="badge badge-primary">Paid Loan</span>
-                                                            @elseif ($client->payment)
-                                                                @if ($client->payment->type === 'NO PAYMENT' || $client->payment->collection == 0)
-                                                                    <span class="badge badge-danger">No Payment</span>
-                                                                @elseif ($client->payment->is_collected == 1)
-                                                                    <span class="badge badge-success">Collected</span>
-                                                                @else
-                                                                    <span class="badge badge-info">To Collect</span>
-                                                                @endif
+                                                            @elseif ($client->payment->type === 'NO PAYMENT' || $client->payment->collection == 0)
+                                                                <span class="badge badge-danger">NO PAYMENT</span>
+                                                            @elseif ($client->payment->is_collected == 1)
+                                                                <span class="badge badge-success">Collected</span>
                                                             @else
-                                                                <span class="badge badge-secondary">Pending</span>
+                                                                <span class="badge badge-info">To Collect</span>
                                                             @endif
                                                         </td>
                                                     @else

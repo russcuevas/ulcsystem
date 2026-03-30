@@ -221,6 +221,35 @@ class AdminCollectionController extends Controller
                             'created_at' => now(),
                             'updated_at' => now()
                         ]);
+                        // send SMS to client notifying NO PAYMENT
+                        try {
+                            $client = DB::table('clients')->where('id', $loan->client_id)->first();
+                            $phone_number = $client->phone ?? null;
+                            $clientName = $client->fullname ?? 'Kliyente';
+
+                            $dailyAmount = number_format($loan->daily ?? 0, 2);
+                            $dueFormatted = \Carbon\Carbon::parse($selectedDate)->format('F d, Y');
+
+                            $message = "Magandang araw {$clientName}! Wala po kaming natanggap na bayad ngayong araw. Ang iyong daily ay (₱{$dailyAmount}). Para sa araw na {$dueFormatted}. Maraming salamat po!";
+
+                            if ($phone_number) {
+                                $ch = curl_init();
+                                $parameters = [
+                                    'apikey' => 'b2a42d09e5cd42585fcc90bf1eeff24e',
+                                    'number' => $phone_number,
+                                    'message' => strip_tags(str_replace("<br>", "\n", $message)),
+                                    'sendername' => 'BPTOCEANUS'
+                                ];
+                                curl_setopt($ch, CURLOPT_URL, 'https://semaphore.co/api/v4/messages');
+                                curl_setopt($ch, CURLOPT_POST, 1);
+                                curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($parameters));
+                                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                                curl_exec($ch);
+                                curl_close($ch);
+                            }
+                        } catch (\Exception $e) {
+                            // Fail silently — do not block process on SMS failure
+                        }
                     } else {
                         if (($payment->collection === null || $payment->collection == 0) && $payment->type !== 'NO PAYMENT') {
                             DB::table('clients_payments')
@@ -231,6 +260,123 @@ class AdminCollectionController extends Controller
                                     'is_collected' => 1,
                                     'updated_at' => now()
                                 ]);
+                            // send SMS to client notifying NO PAYMENT after update
+                            try {
+                                $client = DB::table('clients')->where('id', $loan->client_id)->first();
+                                $phone_number = $client->phone ?? null;
+                                $clientName = $client->fullname ?? 'Kliyente';
+
+                                $dailyAmount = number_format($loan->daily ?? 0, 2);
+                                $dueFormatted = \Carbon\Carbon::parse($selectedDate)->format('F d, Y');
+
+                                $message = "Magandang araw {$clientName}! Wala po kaming natanggap na bayad ngayong araw. Ang iyong daily ay (₱{$dailyAmount}). Para sa araw na {$dueFormatted}. Maraming salamat po!";
+
+                                if ($phone_number) {
+                                    $ch = curl_init();
+                                    $parameters = [
+                                        'apikey' => 'b2a42d09e5cd42585fcc90bf1eeff24e',
+                                        'number' => $phone_number,
+                                        'message' => strip_tags(str_replace("<br>", "\n", $message)),
+                                        'sendername' => 'BPTOCEANUS'
+                                    ];
+                                    curl_setopt($ch, CURLOPT_URL, 'https://semaphore.co/api/v4/messages');
+                                    curl_setopt($ch, CURLOPT_POST, 1);
+                                    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($parameters));
+                                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                                    curl_exec($ch);
+                                    curl_close($ch);
+                                }
+                            } catch (\Exception $e) {
+                                // Fail silently — do not block process on SMS failure
+                            }
+                        }
+                    }
+                }
+            }
+
+            // REMINDER: add missing payment records (with null collection/type) and send SMS reminder
+            if ($action === 'reminder') {
+                if (\Carbon\Carbon::parse($loan->loan_from)->lte($selectedDate)) {
+                    if (!$payment) {
+                        DB::table('clients_payments')->insert([
+                            'reference_number' => (string) $refNo,
+                            'client_id' => $loan->client_id,
+                            'client_loans_id' => $loan->id,
+                            'client_area' => $areaId,
+                            'collection' => null,
+                            'type' => null,
+                            'is_lapsed' => $isLapsed,
+                            'is_collected' => 0,
+                            'due_date' => $selectedDate,
+                            'daily' => $loan->daily ?? 0,
+                            'old_balance' => $loan->balance ?? 0,
+                            'created_by' => $user->id ?? null,
+                            'collected_by' => $collector,
+                            'created_at' => now(),
+                            'updated_at' => now()
+                        ]);
+
+                        // send SMS reminder to client
+                        try {
+                            $client = DB::table('clients')->where('id', $loan->client_id)->first();
+                            $phone_number = $client->phone ?? null;
+                            $clientName = $client->fullname ?? 'Kliyente';
+
+                            $dailyAmount = number_format($loan->daily ?? 0, 2);
+                            $dueFormatted = \Carbon\Carbon::parse($selectedDate)->format('F d, Y');
+
+                            $message = "Magandang araw {$clientName}! Paalala po na wala pa po kaming natatanggap na bayad ngayong araw. Ang iyong daily payment ay: ₱{$dailyAmount}. Due date: {$dueFormatted}. Maraming salamat po.";
+
+                            if ($phone_number) {
+                                $ch = curl_init();
+                                $parameters = [
+                                    'apikey' => 'b2a42d09e5cd42585fcc90bf1eeff24e',
+                                    'number' => $phone_number,
+                                    'message' => strip_tags(str_replace("<br>", "\n", $message)),
+                                    'sendername' => 'BPTOCEANUS'
+                                ];
+                                curl_setopt($ch, CURLOPT_URL, 'https://semaphore.co/api/v4/messages');
+                                curl_setopt($ch, CURLOPT_POST, 1);
+                                curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($parameters));
+                                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                                curl_exec($ch);
+                                curl_close($ch);
+                            }
+                        } catch (\Exception $e) {
+                            // Fail silently — reminder should not block the overall process
+                        }
+                    } else {
+                        // If payment exists but has null collection and null type and not collected,
+                        // still send reminder SMS per request.
+                        if (is_null($payment->collection) && is_null($payment->type) && ($payment->is_collected == 0)) {
+                            try {
+                                $client = DB::table('clients')->where('id', $loan->client_id)->first();
+                                $phone_number = $client->phone ?? null;
+                                $clientName = $client->fullname ?? 'Kliyente';
+
+                                $dailyAmount = number_format($loan->daily ?? 0, 2);
+                                $dueFormatted = \Carbon\Carbon::parse($selectedDate)->format('F d, Y');
+
+                                $message = "Magandang araw {$clientName}! Paalala po na wala pa po kaming natatanggap na bayad ngayong araw. Ang iyong daily payment ay: ₱{$dailyAmount}. Due date: {$dueFormatted}. Maraming salamat po.";
+
+                                if ($phone_number) {
+                                    $ch = curl_init();
+                                    $parameters = [
+                                        'apikey' => 'b2a42d09e5cd42585fcc90bf1eeff24e',
+                                        'number' => $phone_number,
+                                        'message' => strip_tags(str_replace("<br>", "\n", $message)),
+                                        'sendername' => 'BPTOCEANUS'
+                                    ];
+                                    curl_setopt($ch, CURLOPT_URL, 'https://semaphore.co/api/v4/messages');
+                                    curl_setopt($ch, CURLOPT_POST, 1);
+                                    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($parameters));
+                                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                                    curl_exec($ch);
+                                    curl_close($ch);
+                                }
+                            } catch (\Exception $e) {
+                                // Fail silently
+                            }
                         }
                     }
                 }
@@ -256,13 +402,52 @@ class AdminCollectionController extends Controller
                             'status' => $newBalance <= 0 ? 'paid' : 'unpaid',
                             'updated_at' => now()
                         ]);
+
+                    // Send SMS notification to client about the collected payment
+                    try {
+                        $client = DB::table('clients')->where('id', $loan->client_id)->first();
+                        $phone_number = $client->phone ?? null;
+                        $clientName = $client->fullname ?? 'Kliyente';
+
+                        $collectorId = $payment->collected_by ?? $collector;
+                        $collectorName = DB::table('collectors')->where('id', $collectorId)->value('fullname') ?? 'Collector';
+
+                        $dateCollected = \Carbon\Carbon::now()->format('M d Y');
+
+                        $collectedAmount = number_format($payment->collection ?? 0, 2);
+                        $remaining = number_format($newBalance, 2);
+
+                        $message = "Magandang araw {$clientName} Ang inyong payment na halagang {$collectedAmount} ay natanggap ni {$collectorName} - {$dateCollected} ng pag collect Natitirang balanse: {$remaining} Maraming salamat po";
+
+                        if ($phone_number) {
+                            $ch = curl_init();
+                            $parameters = [
+                                'apikey' => 'b2a42d09e5cd42585fcc90bf1eeff24e',
+                                'number' => $phone_number,
+                                'message' => strip_tags(str_replace("<br>", "\n", $message)),
+                                'sendername' => 'BPTOCEANUS'
+                            ];
+                            curl_setopt($ch, CURLOPT_URL, 'https://semaphore.co/api/v4/messages');
+                            curl_setopt($ch, CURLOPT_POST, 1);
+                            curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($parameters));
+                            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                            curl_exec($ch);
+                            curl_close($ch);
+                        }
+                    } catch (\Exception $e) {
+                        // Fail silently — collection should succeed even if SMS fails
+                    }
                 }
             }
         }
 
-        $msg = $action === 'collect'
-            ? 'Payment collected successfully for all applicable clients.'
-            : 'All clients without payment are now tagged as NO PAYMENT.';
+        if ($action === 'collect') {
+            $msg = 'Payment collected successfully for all applicable clients.';
+        } elseif ($action === 'reminder') {
+            $msg = 'Reminders sent to all clients without payment.';
+        } else {
+            $msg = 'All clients without payment are now tagged as NO PAYMENT.';
+        }
 
         return response()->json(['message' => $msg]);
     }
