@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
+use App\Models\Collector;
+use App\Models\Secretary;
+use App\Notifications\PaymentCollectedNotification;
 
 class AdminCollectionController extends Controller
 {
@@ -436,6 +439,26 @@ class AdminCollectionController extends Controller
                         }
                     } catch (\Exception $e) {
                         // Fail silently — collection should succeed even if SMS fails
+                    }
+
+                    // Create a single shared notification for the area so both admin and secretary see it
+                    try {
+                        $clientAreaId = DB::table('clients')->where('id', $loan->client_id)->value('area_id');
+                        DB::table('area_notifications')->insert([
+                            'area_id' => $clientAreaId,
+                            'type' => 'payment_collected',
+                            'data' => json_encode([
+                                'loan_id' => $loan->id ?? null,
+                                'client_id' => $loan->client_id ?? null,
+                                'payment_id' => $payment->id ?? null,
+                                'amount' => $payment->collection ?? 0,
+                                'message' => 'Payment received: ' . number_format($payment->collection ?? 0, 2),
+                            ]),
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ]);
+                    } catch (\Exception $e) {
+                        // Do not block on notification failures
                     }
                 }
             }

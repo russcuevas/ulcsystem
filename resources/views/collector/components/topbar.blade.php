@@ -13,6 +13,58 @@
 
     <!-- Right navbar links -->
     <ul class="navbar-nav ml-auto">
+        <!-- Notifications Dropdown Menu -->
+        <li class="nav-item dropdown">
+            @php
+                use Illuminate\Support\Facades\DB;
+                use Illuminate\Support\Facades\Session;
+
+                $sessionUser = Session::get('user');
+                $unreadCount = 0;
+                $notifications = collect();
+                if ($sessionUser) {
+                    $notifiableType = get_class($sessionUser);
+
+                    $areaIds = DB::table('areas')
+                        ->where('collector_id', $sessionUser->id)
+                        ->pluck('id')
+                        ->toArray();
+
+                    if (!empty($areaIds)) {
+                        $notificationsQuery = DB::table('area_notifications as an')
+                            ->leftJoin('area_notification_reads as r', function ($join) use ($notifiableType, $sessionUser) {
+                                $join->on('an.id', '=', 'r.area_notification_id')
+                                    ->where('r.notifiable_type', $notifiableType)
+                                    ->where('r.notifiable_id', $sessionUser->id);
+                            })
+                            ->whereIn('an.area_id', $areaIds);
+
+                        $unreadCount = (clone $notificationsQuery)->whereNull('r.read_at')->count();
+
+                        $notifications = $notificationsQuery->select('an.*', 'r.read_at')
+                            ->orderBy('an.created_at', 'desc')
+                            ->limit(5)
+                            ->get();
+                    }
+                }
+            @endphp
+            <a class="nav-link" data-toggle="dropdown" href="#">
+                <i class="far fa-bell"></i>
+                <span class="badge badge-warning navbar-badge">{{ $unreadCount }}</span>
+            </a>
+            <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
+                <span class="dropdown-item dropdown-header">{{ $unreadCount }} Notifications</span>
+                <div class="dropdown-divider"></div>
+                @foreach($notifications as $note)
+                    <a href="#" class="dropdown-item">
+                        <i class="fas fa-info-circle mr-2"></i> {{ json_decode($note->data, true)['message'] ?? 'Notification' }}
+                        <span class="float-right text-muted text-sm">{{ \Carbon\Carbon::parse($note->created_at)->diffForHumans() }}</span>
+                    </a>
+                    <div class="dropdown-divider"></div>
+                @endforeach
+                <a href="{{ url('/notifications') }}" class="dropdown-item dropdown-footer">See All Notifications</a>
+            </div>
+        </li>
 
         <li class="nav-item">
             <a class="nav-link" data-widget="fullscreen" href="#" role="button">

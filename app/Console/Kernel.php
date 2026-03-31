@@ -12,7 +12,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // $schedule->command('inspire')->hourly();
+        // Send SMS to clients whose loan starts today — runs at midnight
+        $schedule->command('sms:loan-start')->dailyAt('00:00');
     }
 
     /**

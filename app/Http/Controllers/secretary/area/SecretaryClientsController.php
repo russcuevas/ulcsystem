@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Clients;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Models\Collector;
+use App\Models\Secretary;
+use App\Notifications\NewClientNotification;
 
 class SecretaryClientsController extends Controller
 {
@@ -69,6 +72,23 @@ class SecretaryClientsController extends Controller
                 'created_at'     => now(),
                 'updated_at'     => now(),
             ]);
+            // Create a single shared notification for the area so both admin and secretary see it
+            try {
+                $client = DB::table('clients')->where('id', $clientId)->first();
+                $areaId = $client->area_id ?? null;
+                DB::table('area_notifications')->insert([
+                    'area_id' => $areaId,
+                    'type' => 'new_client',
+                    'data' => json_encode([
+                        'client_id' => $clientId,
+                        'message' => 'New client added: ' . ($client->fullname ?? 'Client'),
+                    ]),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            } catch (\Exception $e) {
+                // Do not block on notification failure
+            }
         });
 
         return redirect()->back()->with('success', 'Client added successfully.');

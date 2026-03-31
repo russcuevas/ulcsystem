@@ -11,6 +11,7 @@ use App\Http\Controllers\admin\area\AdminManilaClientsController;
 use App\Http\Controllers\admin\area\AdminManilaController;
 use App\Http\Controllers\collector\CollectorCollectionController;
 use App\Http\Controllers\collector\CollectorDashboardController;
+use App\Http\Controllers\NotificationsController;
 // SECRETARY
 use App\Http\Controllers\secretary\area\SecretaryAreaController;
 use App\Http\Controllers\secretary\area\SecretaryClientsController;
@@ -189,3 +190,13 @@ Route::middleware('role:collector')->prefix('collector')->name('collector.')->gr
     Route::post('/collections/store', [CollectorCollectionController::class, 'CollectorCollectPaymentRequest'])
         ->name('collections.store');
 });
+
+// Notifications page (shared)
+Route::get('/notifications', [NotificationsController::class, 'index'])
+    ->name('notifications.index');
+
+Route::post('/notifications/mark-read', [NotificationsController::class, 'markAsRead'])
+    ->name('notifications.mark.read');
+
+Route::post('/notifications/mark-all-read', [NotificationsController::class, 'markAllAsRead'])
+    ->name('notifications.mark.all');

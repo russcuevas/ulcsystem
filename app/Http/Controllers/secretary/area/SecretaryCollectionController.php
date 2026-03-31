@@ -347,7 +347,7 @@ class SecretaryCollectionController extends Controller
                                     curl_close($ch);
                                 }
                             } catch (\Exception $e) {
-                                // Fail silently — do not block process on SMS failure
+                                
                             }
                         }
                     }
@@ -435,7 +435,7 @@ class SecretaryCollectionController extends Controller
                                     curl_close($ch);
                                 }
                             } catch (\Exception $e) {
-                                // Fail silently
+                                // Fail silently — reminder should not block the overall process
                             }
                         }
                     }
@@ -467,6 +467,41 @@ class SecretaryCollectionController extends Controller
                             'status' => $newBalance <= 0 ? 'paid' : 'unpaid',
                             'updated_at' => now()
                         ]);
+
+                    // Send SMS notification to client about the collected payment (mirror admin behavior)
+                    try {
+                        $client = DB::table('clients')->where('id', $loan->client_id)->first();
+                        $phone_number = $client->phone ?? null;
+                        $clientName = $client->fullname ?? 'Kliyente';
+
+                        $collectorId = $payment->collected_by ?? $collector;
+                        $collectorName = DB::table('collectors')->where('id', $collectorId)->value('fullname') ?? 'Collector';
+
+                        $dateCollected = \Carbon\Carbon::now()->format('M d Y');
+
+                        $collectedAmount = number_format($payment->collection ?? 0, 2);
+                        $remaining = number_format($newBalance, 2);
+
+                        $message = "Magandang araw {$clientName} Ang inyong payment na halagang {$collectedAmount} ay natanggap ni {$collectorName} - {$dateCollected} ng pag collect Natitirang balanse: {$remaining} Maraming salamat po";
+
+                        if ($phone_number) {
+                            $ch = curl_init();
+                            $parameters = [
+                                'apikey' => 'b2a42d09e5cd42585fcc90bf1eeff24e',
+                                'number' => $phone_number,
+                                'message' => strip_tags(str_replace("<br>", "\n", $message)),
+                                'sendername' => 'BPTOCEANUS'
+                            ];
+                            curl_setopt($ch, CURLOPT_URL, 'https://semaphore.co/api/v4/messages');
+                            curl_setopt($ch, CURLOPT_POST, 1);
+                            curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($parameters));
+                            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                            curl_exec($ch);
+                            curl_close($ch);
+                        }
+                    } catch (\Exception $e) {
+                        // Fail silently — collection should succeed even if SMS fails
+                    }
                 }
             }
         }
