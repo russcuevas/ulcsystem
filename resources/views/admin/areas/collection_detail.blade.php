@@ -5,6 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>ULC System</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
     <link rel="stylesheet" href="{{ asset('plugins/fontawesome-free/css/all.min.css') }}">
     <link rel="stylesheet" href="{{ asset('plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') }}">
@@ -115,8 +116,7 @@
                             <h1 class="m-0">{{ $location_name }} - [{{ $areas_name }}]</h1>
 
                             <ol class="breadcrumb mt-2">
-                                <li class="breadcrumb-item"><a
-                                        href="{{ route('admin.dashboard.page') }}">Dashboard</a>
+                                <li class="breadcrumb-item"><a href="{{ route('admin.dashboard.page') }}">Dashboard</a>
                                 </li>
                                 <li class="breadcrumb-item"><a href="{{ route('admin.areas.page') }}">Areas</a></li>
                                 <li class="breadcrumb-item"><a
@@ -248,9 +248,12 @@
                             </div>
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <div id="filterTabs" class="btn-group" role="group" aria-label="Filter">
-                                    <button type="button" class="btn btn-outline-primary active" data-filter="all">All</button>
-                                    <button type="button" class="btn btn-outline-primary" data-filter="normal">Normal Account</button>
-                                    <button type="button" class="btn btn-outline-primary" data-filter="lapsed">Lapsed Account</button>
+                                    <button type="button" class="btn btn-outline-primary active"
+                                        data-filter="all">All</button>
+                                    <button type="button" class="btn btn-outline-primary"
+                                        data-filter="normal">Normal Account</button>
+                                    <button type="button" class="btn btn-outline-primary"
+                                        data-filter="lapsed">Lapsed Account</button>
                                 </div>
                             </div>
                             <input type="hidden" id="currentFilter" value="all">
@@ -284,7 +287,8 @@
                                             $isPaid = $balance <= 0;
                                         @endphp
 
-                                        <tr class="{{ $isDangerRow ? 'table-danger' : '' }}" data-status="{{ $isDangerRow ? 'lapsed' : 'normal' }}">
+                                        <tr class="{{ $isDangerRow ? 'table-danger' : '' }}"
+                                            data-status="{{ $isDangerRow ? 'lapsed' : 'normal' }}">
                                             <td>{{ $client->fullname }}</td>
 
                                             {{-- Due Date --}}
@@ -318,6 +322,17 @@
                                                     @endif
                                                 @else
                                                     -
+                                                @endif
+                                                @if (!$isPaid && $client->payment && !is_null($client->payment->collection) && $client->payment->type !== 'NO PAYMENT')
+                                                    <button type="button"
+                                                        class="btn btn-sm btn-warning edit-collection-btn"
+                                                        data-payment-id="{{ $client->payment->id }}"
+                                                        data-client-name="{{ $client->fullname }}"
+                                                        data-collection="{{ $client->payment->collection ?? '' }}"
+                                                        data-is-collected="{{ $client->payment->is_collected }}"
+                                                        title="Edit Collection">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
                                                 @endif
                                             </td>
 
@@ -407,7 +422,8 @@
                         text = 'This will tag all clients without payment as NO PAYMENT!';
                         confirmText = 'Yes, mark as NO PAYMENT!';
                     } else if (action === 'reminder') {
-                        text = 'This will send SMS reminders to clients who have no payment recorded for this reference.';
+                        text =
+                            'This will send SMS reminders to clients who have no payment recorded for this reference.';
                         confirmText = 'Yes, send reminders!';
                     }
 
@@ -423,10 +439,12 @@
                         if (result.isConfirmed) {
                             $.ajax({
                                 url: $(this).attr('action'),
-                                method: "POST",
+                                method: 'POST',
                                 data: $(this).serialize(),
                                 success: function(response) {
-                                    let successTitle = action === 'collect' ? 'Collected!' : (action === 'no_payment' ? 'Tagged!' : 'Reminders Sent!');
+                                    let successTitle = action === 'collect' ?
+                                        'Collected!' : (action === 'no_payment' ?
+                                            'Tagged!' : 'Reminders Sent!');
                                     Swal.fire(
                                         successTitle,
                                         response.message,
@@ -434,7 +452,8 @@
                                     ).then(() => location.reload());
                                 },
                                 error: function(err) {
-                                    Swal.fire('Error!', 'Something went wrong.', 'error');
+                                    Swal.fire('Error!', 'Something went wrong.',
+                                        'error');
                                 }
                             });
                         }
@@ -474,6 +493,91 @@
             });
 
 
+        });
+    </script>
+
+    <!-- Edit Collection Modal -->
+    <div class="modal fade" id="editCollectionModal" tabindex="-1" role="dialog"
+        aria-labelledby="editCollectionModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editCollectionModalLabel">Edit Collection</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-2"><strong>Client:</strong> <span id="editClientName"></span></p>
+                    <p class="mb-3 text-muted small" id="editBalanceNote" style="display:none;">
+                        <i class="fas fa-info-circle text-info"></i>
+                        Since this payment is already
+                        <strong>Collected</strong>, changing the collection
+                        amount will adjust the client's balance accordingly.
+                    </p>
+                    <div class="form-group">
+                        <label for="editCollectionInput">Collection Amount (₱)</label>
+                        <input type="number" id="editCollectionInput" class="form-control" min="0"
+                            step="0.01" placeholder="Enter collection amount">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="saveCollectionBtn">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(function() {
+            var currentPaymentId = null;
+
+            $(document).on('click', '.edit-collection-btn', function() {
+                currentPaymentId = $(this).data('payment-id');
+                var clientName = $(this).data('client-name');
+                var collection = $(this).data('collection');
+                var isCollected = parseInt($(this).data('is-collected'));
+
+                $('#editClientName').text(clientName);
+                $('#editCollectionInput').val(collection !== '' ? collection : '');
+
+                if (isCollected === 1) {
+                    $('#editBalanceNote').show();
+                } else {
+                    $('#editBalanceNote').hide();
+                }
+
+                $('#editCollectionModal').modal('show');
+            });
+
+            $('#saveCollectionBtn').on('click', function() {
+                var newCollection = $('#editCollectionInput').val();
+
+                if (newCollection === '' || isNaN(newCollection) || parseFloat(newCollection) < 0) {
+                    Swal.fire('Invalid Input', 'Please enter a valid collection amount.', 'warning');
+                    return;
+                }
+
+                $.ajax({
+                    url: '/admin/collections/payment/' + currentPaymentId + '/collection',
+                    method: 'PUT',
+                    data: {
+                        _token: $('meta[name="csrf-token"]').attr('content'),
+                        collection: parseFloat(newCollection)
+                    },
+                    success: function(response) {
+                        $('#editCollectionModal').modal('hide');
+                        Swal.fire('Updated!', response.message, 'success').then(function() {
+                            location.reload();
+                        });
+                    },
+                    error: function() {
+                        Swal.fire('Error!',
+                            'Something went wrong while updating the collection.', 'error');
+                    }
+                });
+            });
         });
     </script>
 </body>

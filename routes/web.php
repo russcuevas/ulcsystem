@@ -103,6 +103,9 @@ Route::middleware('role:admin')->prefix('admin')->group(function () {
     Route::get('/collections/print/{refNo}', [AdminCollectionController::class, 'AdminPrintCollection'])
         ->name('admin.collections.print');
 
+    Route::put('/collections/payment/{paymentId}/collection', [AdminCollectionController::class, 'AdminEditPaymentCollection'])
+        ->name('admin.collections.payment.edit');
+
     Route::get('/areas/{areaId}/collections/summary-print', [AdminCollectionController::class, 'AdminPrintSummaryCollection'])
         ->name('admin.areas.collections.summary.print');
 

@@ -233,22 +233,10 @@ class AdminCollectionController extends Controller
                             $dailyAmount = number_format($loan->daily ?? 0, 2);
                             $dueFormatted = \Carbon\Carbon::parse($selectedDate)->format('F d, Y');
 
-                            $message = "Magandang araw {$clientName}! Wala po kaming natanggap na bayad ngayong araw. Ang iyong daily ay (₱{$dailyAmount}). Para sa araw na {$dueFormatted}. Maraming salamat po!";
+                            $message = "Magandang araw {$clientName}. Wala pa pong bayad ngayong {$dueFormatted}. Daily: ₱{$dailyAmount}. Salamat.";
 
                             if ($phone_number) {
-                                $ch = curl_init();
-                                $parameters = [
-                                    'apikey' => 'b2a42d09e5cd42585fcc90bf1eeff24e',
-                                    'number' => $phone_number,
-                                    'message' => strip_tags(str_replace("<br>", "\n", $message)),
-                                    'sendername' => 'BPTOCEANUS'
-                                ];
-                                curl_setopt($ch, CURLOPT_URL, 'https://semaphore.co/api/v4/messages');
-                                curl_setopt($ch, CURLOPT_POST, 1);
-                                curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($parameters));
-                                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                                curl_exec($ch);
-                                curl_close($ch);
+                                $this->sendFmcSms($phone_number, $message);
                             }
                         } catch (\Exception $e) {
                             // Fail silently — do not block process on SMS failure
@@ -272,22 +260,10 @@ class AdminCollectionController extends Controller
                                 $dailyAmount = number_format($loan->daily ?? 0, 2);
                                 $dueFormatted = \Carbon\Carbon::parse($selectedDate)->format('F d, Y');
 
-                                $message = "Magandang araw {$clientName}! Wala po kaming natanggap na bayad ngayong araw. Ang iyong daily ay (₱{$dailyAmount}). Para sa araw na {$dueFormatted}. Maraming salamat po!";
+                                $message = "Magandang araw {$clientName}. Wala pa pong bayad ngayong {$dueFormatted}. Daily: ₱{$dailyAmount}. Salamat.";
 
                                 if ($phone_number) {
-                                    $ch = curl_init();
-                                    $parameters = [
-                                        'apikey' => 'b2a42d09e5cd42585fcc90bf1eeff24e',
-                                        'number' => $phone_number,
-                                        'message' => strip_tags(str_replace("<br>", "\n", $message)),
-                                        'sendername' => 'BPTOCEANUS'
-                                    ];
-                                    curl_setopt($ch, CURLOPT_URL, 'https://semaphore.co/api/v4/messages');
-                                    curl_setopt($ch, CURLOPT_POST, 1);
-                                    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($parameters));
-                                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                                    curl_exec($ch);
-                                    curl_close($ch);
+                                    $this->sendFmcSms($phone_number, $message);
                                 }
                             } catch (\Exception $e) {
                                 // Fail silently — do not block process on SMS failure
@@ -328,22 +304,10 @@ class AdminCollectionController extends Controller
                             $dailyAmount = number_format($loan->daily ?? 0, 2);
                             $dueFormatted = \Carbon\Carbon::parse($selectedDate)->format('F d, Y');
 
-                            $message = "Magandang araw {$clientName}! Paalala po na wala pa po kaming natatanggap na bayad ngayong araw. Ang iyong daily payment ay: ₱{$dailyAmount}. Due date: {$dueFormatted}. Maraming salamat po.";
+                            $message = "Magandang araw {$clientName}. Paalala: wala pa pong bayad ngayong {$dueFormatted}. Daily: ₱{$dailyAmount}. Salamat.";
 
                             if ($phone_number) {
-                                $ch = curl_init();
-                                $parameters = [
-                                    'apikey' => 'b2a42d09e5cd42585fcc90bf1eeff24e',
-                                    'number' => $phone_number,
-                                    'message' => strip_tags(str_replace("<br>", "\n", $message)),
-                                    'sendername' => 'BPTOCEANUS'
-                                ];
-                                curl_setopt($ch, CURLOPT_URL, 'https://semaphore.co/api/v4/messages');
-                                curl_setopt($ch, CURLOPT_POST, 1);
-                                curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($parameters));
-                                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                                curl_exec($ch);
-                                curl_close($ch);
+                                $this->sendFmcSms($phone_number, $message);
                             }
                         } catch (\Exception $e) {
                             // Fail silently — reminder should not block the overall process
@@ -360,22 +324,10 @@ class AdminCollectionController extends Controller
                                 $dailyAmount = number_format($loan->daily ?? 0, 2);
                                 $dueFormatted = \Carbon\Carbon::parse($selectedDate)->format('F d, Y');
 
-                                $message = "Magandang araw {$clientName}! Paalala po na wala pa po kaming natatanggap na bayad ngayong araw. Ang iyong daily payment ay: ₱{$dailyAmount}. Due date: {$dueFormatted}. Maraming salamat po.";
+                                $message = "Magandang araw {$clientName}. Paalala: wala pa pong bayad ngayong {$dueFormatted}. Daily: ₱{$dailyAmount}. Salamat.";
 
                                 if ($phone_number) {
-                                    $ch = curl_init();
-                                    $parameters = [
-                                        'apikey' => 'b2a42d09e5cd42585fcc90bf1eeff24e',
-                                        'number' => $phone_number,
-                                        'message' => strip_tags(str_replace("<br>", "\n", $message)),
-                                        'sendername' => 'BPTOCEANUS'
-                                    ];
-                                    curl_setopt($ch, CURLOPT_URL, 'https://semaphore.co/api/v4/messages');
-                                    curl_setopt($ch, CURLOPT_POST, 1);
-                                    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($parameters));
-                                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                                    curl_exec($ch);
-                                    curl_close($ch);
+                                    $this->sendFmcSms($phone_number, $message);
                                 }
                             } catch (\Exception $e) {
                                 // Fail silently
@@ -420,22 +372,10 @@ class AdminCollectionController extends Controller
                         $collectedAmount = number_format($payment->collection ?? 0, 2);
                         $remaining = number_format($newBalance, 2);
 
-                        $message = "Magandang araw {$clientName} Ang inyong payment na halagang {$collectedAmount} ay natanggap ni {$collectorName} - {$dateCollected} ng pag collect Natitirang balanse: {$remaining} Maraming salamat po";
+                        $message = "Magandang araw {$clientName}. Natanggap ni {$collectorName} ang bayad na ₱{$collectedAmount} ({$dateCollected}). Natitirang balanse: ₱{$remaining}. Salamat.";
 
                         if ($phone_number) {
-                            $ch = curl_init();
-                            $parameters = [
-                                'apikey' => 'b2a42d09e5cd42585fcc90bf1eeff24e',
-                                'number' => $phone_number,
-                                'message' => strip_tags(str_replace("<br>", "\n", $message)),
-                                'sendername' => 'BPTOCEANUS'
-                            ];
-                            curl_setopt($ch, CURLOPT_URL, 'https://semaphore.co/api/v4/messages');
-                            curl_setopt($ch, CURLOPT_POST, 1);
-                            curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($parameters));
-                            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                            curl_exec($ch);
-                            curl_close($ch);
+                            $this->sendFmcSms($phone_number, $message);
                         }
                     } catch (\Exception $e) {
                         // Fail silently — collection should succeed even if SMS fails
@@ -656,5 +596,92 @@ class AdminCollectionController extends Controller
             'location_name' => $location_name,
             'areas_name' => $areas_name
         ]);
+    }
+
+    public function AdminEditPaymentCollection(Request $request, $paymentId)
+    {
+        $request->validate([
+            'collection' => 'required|numeric|min:0',
+        ]);
+
+        $payment = DB::table('clients_payments')->where('id', $paymentId)->first();
+        if (!$payment) {
+            return response()->json(['message' => 'Payment not found.'], 404);
+        }
+
+        $newCollection = (float) $request->input('collection');
+
+        if ($payment->is_collected == 1) {
+            $loan = DB::table('clients_loans')->where('id', $payment->client_loans_id)->first();
+            if ($loan) {
+                $oldCollection = (float) ($payment->collection ?? 0);
+                $newBalance = (float) $loan->balance + ($oldCollection - $newCollection);
+                $newBalance = max($newBalance, 0);
+
+                DB::table('clients_loans')
+                    ->where('id', $loan->id)
+                    ->update([
+                        'balance' => $newBalance,
+                        'status' => $newBalance <= 0 ? 'paid' : 'unpaid',
+                        'updated_at' => now(),
+                    ]);
+            }
+        }
+
+        DB::table('clients_payments')
+            ->where('id', $paymentId)
+            ->update([
+                'collection' => $newCollection,
+                'updated_at' => now(),
+            ]);
+
+        return response()->json(['message' => 'Collection updated successfully.']);
+    }
+
+    private function sendFmcSms($toNumber, $messageBody)
+    {
+        $apiKey = env('FMCSMS_API_KEY', 'fmcsms_355f169d562618ecf3d77770c4b35e1a6aec157537facea4');
+        $fromNumber = env('FMCSMS_FROM_NUMBER', '+639495748302');
+        $senderName = env('FMCSMS_SENDER_NAME', 'ULC');
+
+        $payload = [
+            'SenderName' => $senderName,
+            'ToNumber' => $this->normalizePhoneNumber($toNumber),
+            'MessageBody' => strip_tags(str_replace("<br>", "\n", $messageBody)),
+            'FromNumber' => $fromNumber,
+        ];
+
+        $ch = curl_init('https://www.fortmed.org/web/FMCSMS/api/messages.php');
+        curl_setopt_array($ch, [
+            CURLOPT_POST => true,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HTTPHEADER => [
+                'Content-Type: application/json',
+                'X-API-Key: ' . $apiKey,
+            ],
+            CURLOPT_POSTFIELDS => json_encode($payload),
+        ]);
+
+        curl_exec($ch);
+        curl_close($ch);
+    }
+
+    private function normalizePhoneNumber($phone)
+    {
+        $cleaned = preg_replace('/[^0-9+]/', '', (string) $phone);
+
+        if (strpos($cleaned, '+63') === 0) {
+            return $cleaned;
+        }
+
+        if (strpos($cleaned, '09') === 0) {
+            return '+63' . substr($cleaned, 1);
+        }
+
+        if (strpos($cleaned, '639') === 0) {
+            return '+' . $cleaned;
+        }
+
+        return $cleaned;
     }
 }

@@ -15,7 +15,16 @@ class ClientsTableSeeder extends Seeder
     {
         Clients::create([
             'fullname' => 'Juan Dela Cruz',
-            'phone' => '09123456789',
+            'phone' => '09918983072',
+            'address' => 'Manila, Philippines',
+            'area_id' => 1,
+            'gender' => 'male',
+            'created_by' => 'admin',
+        ]);
+
+        Clients::create([
+            'fullname' => 'Russel Vincent Cuevas',
+            'phone' => '09495748302',
             'address' => 'Manila, Philippines',
             'area_id' => 1,
             'gender' => 'male',
