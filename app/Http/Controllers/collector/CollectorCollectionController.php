@@ -148,4 +148,60 @@ class CollectorCollectionController extends Controller
 
         return redirect()->back()->with('success', 'Saved successfully!');
     }
+
+    /**
+     * Bulk store multiple client collections.
+     */
+    public function CollectorBulkCollectPaymentRequest(Request $request)
+    {
+        $user = Session::get('user');
+        $payments = $request->payments;
+
+        if (!$payments || !is_array($payments)) {
+            return redirect()->back()->with('error', 'No collections selected.');
+        }
+
+        DB::beginTransaction();
+        try {
+            foreach ($payments as $paymentData) {
+                if (empty($paymentData['type'])) continue;
+
+                $loan = DB::table('clients_loans')
+                    ->where('id', $paymentData['loan_id'])
+                    ->first();
+
+                if (!$loan) continue;
+
+                $collectionAmount = $paymentData['type'] === 'NO PAYMENT' ? null : ($paymentData['collection'] ?? null);
+
+                // Validation check for balance
+                if ($collectionAmount !== null && $collectionAmount > $loan->balance) {
+                    throw new \Exception("Collection for client ID " . $paymentData['client_id'] . " cannot exceed remaining balance.");
+                }
+
+                DB::table('clients_payments')->insert([
+                    'reference_number' => $request->reference_no,
+                    'collected_by' => $user->id,
+                    'due_date' => $request->due_date,
+                    'client_id' => $paymentData['client_id'],
+                    'client_loans_id' => $paymentData['loan_id'],
+                    'client_area' => $paymentData['area_id'],
+                    'daily' => $paymentData['daily'],
+                    'old_balance' => $loan->balance,
+                    'collection' => $collectionAmount,
+                    'type' => $paymentData['type'],
+                    'is_collected' => 0,
+                    'created_by' => $user->id,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+
+            DB::commit();
+            return redirect()->back()->with('success', 'Bulk collections saved successfully!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Error during bulk save: ' . $e->getMessage());
+        }
+    }
 }

@@ -105,10 +105,16 @@
                                             [{{ $area->areas_name ?? 'N/A' }}]</h3>
 
 
-                                        <button class="btn btn-success btn-sm px-3" data-toggle="modal"
-                                            data-target="#selectDate">
-                                            <i class="fas fa-calendar"></i>&nbsp; Select Date
-                                        </button>
+                                        <div class="d-flex align-items-center" style="gap: 10px;">
+                                            <button type="button" id="bulkSaveBtn" class="btn btn-primary btn-sm px-3">
+                                                <i class="fas fa-save"></i>&nbsp; Bulk Save All
+                                            </button>
+
+                                            <button class="btn btn-success btn-sm px-3" data-toggle="modal"
+                                                data-target="#selectDate">
+                                                <i class="fas fa-calendar"></i>&nbsp; Select Date
+                                            </button>
+                                        </div>
 
                                     </div>
                                 </div>
@@ -200,7 +206,11 @@
                                         </thead>
                                         <tbody>
                                             @foreach ($clients as $client)
-                                                <tr class="{{ $client->is_overdue ? 'table-danger' : '' }}">
+                                                <tr class="{{ $client->is_overdue ? 'table-danger' : '' }}"
+                                                    data-client-id="{{ $client->id }}"
+                                                    data-loan-id="{{ $client->loan->id ?? '' }}"
+                                                    data-area-id="{{ $client->area_id }}"
+                                                    data-daily="{{ $client->loan->daily ?? 0 }}">
                                                     <td>{{ $client->fullname }}</td>
 
                                                     {{-- Due Date --}}
@@ -335,9 +345,10 @@
     <script src="{{ asset('dist/js/demo.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
     <script>
+        let notyf;
         document.addEventListener("DOMContentLoaded", function() {
 
-            const notyf = new Notyf({
+            notyf = new Notyf({
                 duration: 5000,
                 position: {
                     x: 'right',
@@ -383,8 +394,66 @@
                 }
             });
 
+            // Bulk Save functionality (without checkboxes)
+            $('#bulkSaveBtn').on('click', function() {
+                const table = $('#manilaTable').DataTable();
+                const rows = table.rows().nodes(); // This gets all rows across all pages
+                let paymentsToSave = [];
+
+                $(rows).each(function() {
+                    const tr = $(this);
+                    const typeSelect = tr.find('select[name="type"]');
+
+                    // Only include rows where a payment type has been selected
+                    if (typeSelect.length && typeSelect.val()) {
+                        paymentsToSave.push({
+                            tr: tr,
+                            type: typeSelect.val(),
+                            collection: tr.find('input[name="collection"]').val() || null,
+                            clientId: tr.data('client-id'),
+                            loanId: tr.data('loan-id'),
+                            areaId: tr.data('area-id'),
+                            daily: tr.data('daily')
+                        });
+                    }
+                });
+
+                if (paymentsToSave.length === 0) {
+                    notyf.error(
+                        'No collections found. Please select a Payment Type for the rows you want to save.'
+                        );
+                    return;
+                }
+
+                $('#bulkInputs').empty();
+                paymentsToSave.forEach((payment, index) => {
+                    $('#bulkInputs').append(`
+                        <input type="hidden" name="payments[${index}][client_id]" value="${payment.clientId}">
+                        <input type="hidden" name="payments[${index}][loan_id]" value="${payment.loanId}">
+                        <input type="hidden" name="payments[${index}][area_id]" value="${payment.areaId}">
+                        <input type="hidden" name="payments[${index}][daily]" value="${payment.daily}">
+                        <input type="hidden" name="payments[${index}][collection]" value="${payment.collection}">
+                        <input type="hidden" name="payments[${index}][type]" value="${payment.type}">
+                    `);
+                });
+
+                if (confirm(
+                        `Are you sure you want to bulk save ${paymentsToSave.length} collections across all pages?`
+                        )) {
+                    $('#bulkForm').submit();
+                }
+            });
+
         });
     </script>
+
+    <form id="bulkForm" action="{{ route('collector.collections.bulk-store') }}" method="POST"
+        style="display: none;">
+        @csrf
+        <input type="hidden" name="reference_no" value="{{ $refNo }}">
+        <input type="hidden" name="due_date" value="{{ $selectedDate }}">
+        <div id="bulkInputs"></div>
+    </form>
 </body>
 
 </html>

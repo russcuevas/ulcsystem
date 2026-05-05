@@ -192,6 +192,8 @@ Route::middleware('role:collector')->prefix('collector')->name('collector.')->gr
         ->name('collections.page');
     Route::post('/collections/store', [CollectorCollectionController::class, 'CollectorCollectPaymentRequest'])
         ->name('collections.store');
+    Route::post('/collections/bulk-store', [CollectorCollectionController::class, 'CollectorBulkCollectPaymentRequest'])
+        ->name('collections.bulk-store');
 });
 
 // Notifications page (shared)
