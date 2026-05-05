@@ -90,6 +90,7 @@
                                         <thead>
                                             <tr>
                                                 <th>Collector Name</th>
+                                                <th>Email</th>
                                                 <th>Action</th>
                                             </tr>
                                         </thead>
@@ -97,6 +98,7 @@
                                             @foreach ($collectors as $collector)
                                                 <tr>
                                                     <td>{{ $collector->fullname }}</td>
+                                                    <td>{{ $collector->email }}</td>
                                                     <td>
                                                         <button class="btn btn-sm btn-warning" data-toggle="modal"
                                                             data-target="#editCollectorModal{{ $collector->id }}">

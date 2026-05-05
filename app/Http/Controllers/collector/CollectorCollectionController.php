@@ -115,11 +115,11 @@ class CollectorCollectionController extends Controller
 
         $request->validate([
             'collection' => [
-                'required',
+                'nullable',
                 'numeric',
                 'min:0',
                 function ($attribute, $value, $fail) use ($loan) {
-                    if ($value > $loan->balance) {
+                    if ($value !== null && $value > $loan->balance) {
                         $fail('Collection cannot exceed remaining balance.');
                     }
                 }
@@ -127,6 +127,7 @@ class CollectorCollectionController extends Controller
             'type' => 'required|string'
         ]);
 
+        $collectionAmount = $request->type === 'NO PAYMENT' ? null : $request->collection;
 
         DB::table('clients_payments')->insert([
             'reference_number' => $request->reference_no,
@@ -137,7 +138,7 @@ class CollectorCollectionController extends Controller
             'client_area' => $request->area_id,
             'daily' => $request->daily,
             'old_balance' => $loan->balance, // ✅ real balance from DB
-            'collection' => $request->collection,
+            'collection' => $collectionAmount,
             'type' => $request->type,
             'is_collected' => 0,
             'created_by' => $user->id,

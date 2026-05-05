@@ -14,6 +14,15 @@
                         <input type="text" name="fullname" class="form-control" value="{{ $collector->fullname }}"
                             required>
                     </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" name="email" class="form-control" value="{{ $collector->email }}"
+                            required>
+                    </div>
+                    <div class="form-group">
+                        <label>Password (Leave blank to keep current password)</label>
+                        <input type="password" name="password" class="form-control">
+                    </div>
                 </div>
 
                 <div class="modal-footer">

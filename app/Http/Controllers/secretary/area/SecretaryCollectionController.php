@@ -287,8 +287,9 @@ class SecretaryCollectionController extends Controller
 
                             $dailyAmount = number_format($loan->daily ?? 0, 2);
                             $dueFormatted = \Carbon\Carbon::parse($selectedDate)->format('F d, Y');
+                            $remaining = number_format($loan->balance ?? 0, 2);
 
-                            $message = "Magandang araw {$clientName}! Wala po kaming natanggap na bayad ngayong araw. Ang iyong daily ay (₱{$dailyAmount}). Para sa araw na {$dueFormatted}. Maraming salamat po!";
+                            $message = "Magandang araw {$clientName}! Wala po kaming natanggap na bayad ngayong araw. Ang iyong daily ay (₱{$dailyAmount}). Para sa araw na {$dueFormatted}. Natitirang balanse: {$remaining}. Maraming salamat po!";
 
                             if ($phone_number) {
                                 $ch = curl_init();
@@ -310,11 +311,12 @@ class SecretaryCollectionController extends Controller
                         }
                     } else {
 
-                        if (($payment->collection === null || $payment->collection == 0) && $payment->type !== 'NO PAYMENT') {
+                        if ($payment->type === 'NO PAYMENT' || (($payment->collection === null || $payment->collection == 0) && $payment->type !== 'NO PAYMENT')) {
 
                             DB::table('clients_payments')
                                 ->where('id', $payment->id)
                                 ->update([
+                                    'collection' => 0,
                                     'type' => 'NO PAYMENT',
                                     'is_lapsed' => $isLapsed,
                                     'is_collected' => 1,
@@ -328,8 +330,9 @@ class SecretaryCollectionController extends Controller
 
                                 $dailyAmount = number_format($loan->daily ?? 0, 2);
                                 $dueFormatted = \Carbon\Carbon::parse($selectedDate)->format('F d, Y');
+                                $remaining = number_format($loan->balance ?? 0, 2);
 
-                                $message = "Magandang araw {$clientName}! Wala po kaming natanggap na bayad ngayong araw. Ang iyong daily ay (₱{$dailyAmount}). Para sa araw na {$dueFormatted}. Maraming salamat po!";
+                                $message = "Magandang araw {$clientName}! Wala po kaming natanggap na bayad ngayong araw. Ang iyong daily ay (₱{$dailyAmount}). Para sa araw na {$dueFormatted}. Natitirang balanse: {$remaining}. Maraming salamat po!";
 
                                 if ($phone_number) {
                                     $ch = curl_init();
@@ -347,7 +350,6 @@ class SecretaryCollectionController extends Controller
                                     curl_close($ch);
                                 }
                             } catch (\Exception $e) {
-                                
                             }
                         }
                     }
@@ -384,8 +386,9 @@ class SecretaryCollectionController extends Controller
 
                             $dailyAmount = number_format($loan->daily ?? 0, 2);
                             $dueFormatted = \Carbon\Carbon::parse($selectedDate)->format('F d, Y');
+                            $remaining = number_format($loan->balance ?? 0, 2);
 
-                            $message = "Magandang araw {$clientName}! Paalala po na wala pa po kaming natatanggap na bayad ngayong araw. Ang iyong daily payment ay: ₱{$dailyAmount}. Due date: {$dueFormatted}. Maraming salamat po.";
+                            $message = "Magandang araw {$clientName}! Paalala po na wala pa po kaming natatanggap na bayad ngayong araw. Ang iyong daily payment ay: ₱{$dailyAmount}. Due date: {$dueFormatted}. Natitirang balanse: {$remaining}. Maraming salamat po.";
 
                             if ($phone_number) {
                                 $ch = curl_init();
@@ -416,8 +419,9 @@ class SecretaryCollectionController extends Controller
 
                                 $dailyAmount = number_format($loan->daily ?? 0, 2);
                                 $dueFormatted = \Carbon\Carbon::parse($selectedDate)->format('F d, Y');
+                                $remaining = number_format($loan->balance ?? 0, 2);
 
-                                $message = "Magandang araw {$clientName}! Paalala po na wala pa po kaming natatanggap na bayad ngayong araw. Ang iyong daily payment ay: ₱{$dailyAmount}. Due date: {$dueFormatted}. Maraming salamat po.";
+                                $message = "Magandang araw {$clientName}! Paalala po na wala pa po kaming natatanggap na bayad ngayong araw. Ang iyong daily payment ay: ₱{$dailyAmount}. Due date: {$dueFormatted}. Natitirang balanse: {$remaining}. Maraming salamat po.";
 
                                 if ($phone_number) {
                                     $ch = curl_init();
@@ -447,7 +451,7 @@ class SecretaryCollectionController extends Controller
             // -----------------------------
             if ($action === 'collect') {
 
-                if ($payment && $payment->collection > 0 && $payment->is_collected == 0) {
+                if ($payment && $payment->collection > 0 && $payment->is_collected == 0 && $payment->type !== 'NO PAYMENT') {
 
                     $newBalance = $loan->balance - $payment->collection;
                     $newBalance = max($newBalance, 0);

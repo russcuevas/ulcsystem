@@ -66,11 +66,11 @@
                             <div class="form-row">
                                 <div class="form-group col-md-6">
                                     <label>Loan From *</label>
-                                    <input type="date" name="loan_from" class="form-control" required>
+                                    <input type="date" name="loan_from" id="renew_loan_from" class="form-control" required>
                                 </div>
                                 <div class="form-group col-md-6">
                                     <label>Loan To *</label>
-                                    <input type="date" name="loan_to" class="form-control" required>
+                                    <input type="date" name="loan_to" id="renew_loan_to" class="form-control" required>
                                 </div>
                             </div>
 
@@ -115,3 +115,15 @@
         </form>
     </div>
 </div>
+
+<script>
+    document.getElementById('renew_loan_from').addEventListener('change', function() {
+        const fromDate = this.value;
+        if (fromDate) {
+            const date = new Date(fromDate);
+            date.setDate(date.getDate() + 100);
+            const toDate = date.toISOString().split('T')[0];
+            document.getElementById('renew_loan_to').value = toDate;
+        }
+    });
+</script>

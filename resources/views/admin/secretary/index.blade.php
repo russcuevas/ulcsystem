@@ -89,6 +89,7 @@
                                         <thead>
                                             <tr>
                                                 <th>Secretary Name</th>
+                                                <th>Email</th>
                                                 <th>Action</th>
                                             </tr>
                                         </thead>
@@ -96,6 +97,7 @@
                                             @foreach ($secretaries as $secretary)
                                                 <tr>
                                                     <td>{{ $secretary->fullname }}</td>
+                                                    <td>{{ $secretary->email }}</td>
                                                     <td>
                                                         <button class="btn btn-sm btn-warning" data-toggle="modal"
                                                             data-target="#editSecretaryModal{{ $secretary->id }}">

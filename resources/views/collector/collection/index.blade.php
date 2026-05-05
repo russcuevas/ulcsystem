@@ -231,7 +231,7 @@
                                                     @if ($client->payment && !(is_null($client->payment->collection) && is_null($client->payment->type)))
                                                         <td>
                                                             @if (is_null($client->payment->collection))
-                                                                -
+                                                                0
                                                             @else
                                                                 ₱{{ number_format($client->payment->collection, 2) }}
                                                             @endif
@@ -275,6 +275,7 @@
                                                                 <option value="CASH">CASH</option>
                                                                 <option value="GCASH">GCASH</option>
                                                                 <option value="CHEQUE">CHEQUE</option>
+                                                                <option value="NO PAYMENT">NO PAYMENT</option>
                                                             </select>
                                                         </td>
 
@@ -368,6 +369,18 @@
                 "searching": true,
                 "ordering": true,
                 "responsive": true
+            });
+
+            $(document).on('change', 'select[name="type"]', function() {
+                const tr = $(this).closest('tr');
+                const collectionInput = tr.find('input[name="collection"]');
+
+                if ($(this).val() === 'NO PAYMENT') {
+                    collectionInput.val('');
+                    collectionInput.prop('readonly', true);
+                } else {
+                    collectionInput.prop('readonly', false);
+                }
             });
 
         });

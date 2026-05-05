@@ -21,6 +21,15 @@
                             <input type="text" name="fullname" class="form-control"
                                 value="{{ $secretary->fullname }}" required>
                         </div>
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" name="email" class="form-control"
+                                value="{{ $secretary->email }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Password (Leave blank to keep current password)</label>
+                            <input type="password" name="password" class="form-control">
+                        </div>
 
                     </div>
 
